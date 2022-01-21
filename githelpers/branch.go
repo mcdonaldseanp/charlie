@@ -21,11 +21,12 @@ func Setgitbranch(branch_name string) (error) {
 	}
 	err = wt.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(branch_name),
+		Force: false,
 	})
 	if err != nil {
 		return &airer.Airer{
 			airer.ExecError,
-			fmt.Sprintf("Failed to load work tree!\n%s\n", err),
+			fmt.Sprintf("Failed to check out branch!\n%s\n", err),
 		}
 	}
 	return nil
