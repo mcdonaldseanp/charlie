@@ -15,7 +15,7 @@ func ExecAsShell(shell_command *exec.Cmd) (error) {
 	if err != nil {
 		return &airer.Airer{
 			airer.ShellError,
-			fmt.Sprintf("Command failed: %s\n", err),
+			fmt.Sprintf("Command %s failed: %s\n", shell_command, err),
 		}
 	}
 	return nil

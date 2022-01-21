@@ -27,9 +27,7 @@ func FindYubikeyBUSID() (string, error) {
 
 func ConnectYubikey() (error) {
 	bus_id, err := FindYubikeyBUSID()
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	if bus_id == "" {
 		return &airer.Airer{
 			airer.ExecError,
@@ -37,12 +35,8 @@ func ConnectYubikey() (error) {
 		}
 	}
 	err = utils.ExecAsShell(exec.Command("usbipd.exe", "wsl", "attach", "--busid", bus_id))
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	err = utils.ExecAsShell(exec.Command("sudo", "service", "pcscd", "restart"))
-	if err != nil {
-		return err
-	}
+	if err != nil { return err }
 	return nil
 }

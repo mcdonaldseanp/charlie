@@ -1,10 +1,10 @@
 package main
 
 import (
-	"github.com/McdonaldSeanp/charlie/auth"
-	"github.com/McdonaldSeanp/charlie/githelpers"
 	"os"
 	"fmt"
+	"github.com/McdonaldSeanp/charlie/auth"
+	"github.com/McdonaldSeanp/charlie/githelpers"
 )
 
 func main() {
