@@ -24,3 +24,17 @@ func OpenRepo() (*git.Repository, error) {
 	}
 	return repo, nil
 }
+
+func OpenWorktree() (*git.Worktree, error) {
+	repo, err := OpenRepo()
+	if err != nil { return nil, err }
+
+	wt, err := repo.Worktree()
+	if err != nil {
+		return nil, &airer.Airer{
+			airer.ExecError,
+			fmt.Sprintf("Failed to load work tree!\n%s\n", err),
+		}
+	}
+	return wt, nil
+}
