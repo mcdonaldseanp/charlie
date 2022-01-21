@@ -2,7 +2,6 @@ package auth
 
 import (
 	"fmt"
-	"bytes"
 	"strings"
 	"os/exec"
 	"github.com/McdonaldSeanp/charlie/utils"
@@ -10,19 +9,9 @@ import (
 )
 
 func FindYubikeyBUSID() (string, error) {
-	cmd := exec.Command("usbipd.exe", "wsl", "list")
-	var stdout, stderr bytes.Buffer
-	cmd.Stdout = &stdout
-	cmd.Stderr = &stderr
-	err := cmd.Run()
-	if err != nil {
-		return "", &airer.Airer{
-			airer.ShellError,
-			fmt.Sprintf("ERROR '%s' failed: %s\n\nstderr: %s\n", cmd, err, string(stderr.Bytes())),
-		}
-	}
-	outStrLines := string(stdout.Bytes())
-	return strings.Split(utils.LineWithSubStr(outStrLines, "Smartcard Reader"), " ")[0], nil
+	output, err := utils.ExecReadOutput(exec.Command("usbipd.exe", "wsl", "list"))
+	if err != nil { return "", err }
+	return strings.Split(utils.LineWithSubStr(output, "Smartcard Reader"), " ")[0], nil
 }
 
 func ConnectYubikey() (error) {
