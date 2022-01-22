@@ -3,18 +3,25 @@ package main
 import (
 	"os"
 	"fmt"
+	"flag"
 	"github.com/McdonaldSeanp/charlie/auth"
 	"github.com/McdonaldSeanp/charlie/githelpers"
 )
 
 func main() {
+	// Things need to be parsed inside the switch so that
+	// the flag package can ignore any required commands
+	// before parsing
+	fs := flag.NewFlagSet("cli", flag.ExitOnError)
+	clear_branch := fs.Bool("clear", false, "use --clear with 'set branch' to delete any changes in work tree")
+
 	switch os.Args[1] {
 		case "load":
 			switch os.Args[2] {
 				case "yubikey":
 					err := auth.ConnectYubikey()
 					if err != nil {
-						fmt.Printf("Did not load yubikey!\n%s", err)
+						fmt.Printf("Did not load yubikey!\n%s\n", err)
 						os.Exit(1)
 					}
 				default:
@@ -24,9 +31,10 @@ func main() {
 		case "set":
 			switch os.Args[2] {
 				case "branch":
-					err := githelpers.Setgitbranch(os.Args[3])
+					fs.Parse(os.Args[4:])
+					err := githelpers.Setgitbranch(os.Args[3], *clear_branch)
 					if err != nil {
-						fmt.Printf("Did not set branch!\n%s", err)
+						fmt.Printf("Did not set branch!\n%s\n", err)
 						os.Exit(1)
 					}
 				default:

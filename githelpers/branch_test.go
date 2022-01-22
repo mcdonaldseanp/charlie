@@ -69,7 +69,7 @@ func TestBranchSame(t *testing.T) {
 	os.Chdir(testdir)
 	initRepo(t)
 	// Actually run the thing
-	err := Setgitbranch("main")
+	err := Setgitbranch("main", false)
 	if err != nil {
 		t.Fatalf("Setting the git branch failed: %s\n", err)
 	}
@@ -89,7 +89,7 @@ func TestBranchNoExist(t *testing.T) {
 	os.Chdir(testdir)
 	initRepo(t)
 	// Actually run the thing
-	err := Setgitbranch("")
+	err := Setgitbranch("", false)
 	if err == nil {
 		t.Fatalf("Setting the git branch was supposed to fail!")
 	}
@@ -99,7 +99,7 @@ func TestBranchNoExist(t *testing.T) {
 		t.Fatalf("Branch is not correctly set, should be 'main', is '%s'\n", branch_now)
 	}
 	// run again with a real name
-	err = Setgitbranch("non_existant")
+	err = Setgitbranch("non_existant", false)
 	if err == nil {
 		t.Fatalf("Setting the git branch was supposed to fail!")
 	}
@@ -130,7 +130,7 @@ func TestBranchDifferent(t *testing.T) {
 	// Create a fake commit so the new branch is ahead of main
 	fakeCommit(testdir, t)
 	// Actually run the thing
-	err = Setgitbranch("main")
+	err = Setgitbranch("main", false)
 	if err != nil {
 		t.Fatalf("Setting the git branch failed: %s\n", err)
 	}
@@ -162,12 +162,56 @@ func TestBranchDirty(t *testing.T) {
 	// Create an uncommitted file
 	fakeFile(testdir, t)
 	// Actually run the thing
-	err = Setgitbranch("main")
+	err = Setgitbranch("main", false)
 	if err == nil {
 		t.Fatalf("Setting the git branch was supposed to fail!")
 	}
 	branch_now = getBranch(t)
 	if branch_now != "different" {
 		t.Fatalf("Branch is not correctly set, should be 'different', is '%s'\n", branch_now)
+	}
+}
+
+// Test that checking out with --clear set will clean the branch and switch
+func TestBranchClear(t *testing.T) {
+	originaldir, _ := os.Getwd()
+	testdir, _ := os.MkdirTemp("", "charlie_testing")
+	defer os.RemoveAll(testdir)
+	defer os.Chdir(originaldir)
+	os.Chdir(testdir)
+	initRepo(t)
+	_, err := utils.ExecReadOutput(exec.Command("git", "checkout", "-B", "different"))
+	if err != nil {
+		t.Fatalf("Creating second git branch failed: %s\n", err)
+	}
+	// Check to make sure we are actually on a new branch
+	branch_now := getBranch(t)
+	if branch_now != "different" {
+		t.Fatalf("Branch is not correctly set, should be 'different', is '%s'\n", branch_now)
+	}
+	// Create a fake commit so the new branch is ahead of main
+	fakeCommit(testdir, t)
+	// Create an uncommitted file
+	fakeFile(testdir, t)
+	// Actually run the thing
+	err = Setgitbranch("main", true)
+	if err != nil {
+		t.Fatalf("Setting the git branch failed: %s\n", err)
+	}
+	branch_now = getBranch(t)
+	if branch_now != "main" {
+		t.Fatalf("Branch is not correctly set, should be 'different', is '%s'\n", branch_now)
+	}
+	// Check that the work tree is clean again
+	wt, err := OpenWorktree()
+	if err != nil {
+		t.Fatalf("Getting the work tree failed: %s\n", err)
+	}
+	clean, err := WorkTreeClean(wt)
+	if err != nil {
+		t.Fatalf("Getting the work tree failed: %s\n", err)
+	}
+	if !clean {
+		t.Fatalf("Working tree is not clean")
 	}
 }

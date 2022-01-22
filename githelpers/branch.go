@@ -8,13 +8,13 @@ import (
 )
 
 
-func Setgitbranch(branch_name string) (error) {
+func Setgitbranch(branch_name string, clear bool) (error) {
 	wt, err := OpenWorktree()
 	if err != nil { return err }
 
-	clean, err := workTreeClean(wt)
+	clean, err := WorkTreeClean(wt)
 	if err != nil { return err }
-	if !clean {
+	if !clean && !clear {
 		return &airer.Airer{
 			airer.ExecError,
 			fmt.Sprintf("Cannot switch branch when work tree is not clean"),
@@ -22,7 +22,7 @@ func Setgitbranch(branch_name string) (error) {
 	}
 	err = wt.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(branch_name),
-		Force: false,
+		Force: clear,
 		Keep: false,
 	})
 	if err != nil {
@@ -34,7 +34,7 @@ func Setgitbranch(branch_name string) (error) {
 	return nil
 }
 
-func workTreeClean(wt *git.Worktree) (bool, error) {
+func WorkTreeClean(wt *git.Worktree) (bool, error) {
 	status, err := wt.Status()
 	if err != nil {
 		return false, &airer.Airer{
