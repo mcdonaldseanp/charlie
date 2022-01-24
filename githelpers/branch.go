@@ -8,19 +8,20 @@ import (
 )
 
 
-func Setgitbranch(branch_name string, clear bool) (error) {
-	wt, err := OpenWorktree()
-	if err != nil { return err }
+func Setgitbranch(branch_name string, clear bool) (*airer.Airer) {
+	wt, airr := OpenWorktree()
+	if airr != nil { return airr }
 
-	clean, err := WorkTreeClean(wt)
-	if err != nil { return err }
+	clean, airr := WorkTreeClean(wt)
+	if airr != nil { return airr }
 	if !clean && !clear {
 		return &airer.Airer{
 			airer.ExecError,
 			fmt.Sprintf("Cannot switch branch when work tree is not clean"),
+			nil,
 		}
 	}
-	err = wt.Checkout(&git.CheckoutOptions{
+	err := wt.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(branch_name),
 		Force: clear,
 		Keep: false,
@@ -29,17 +30,19 @@ func Setgitbranch(branch_name string, clear bool) (error) {
 		return &airer.Airer{
 			airer.ExecError,
 			fmt.Sprintf("Failed to check out branch!\n%s\n", err),
+			err,
 		}
 	}
 	return nil
 }
 
-func WorkTreeClean(wt *git.Worktree) (bool, error) {
+func WorkTreeClean(wt *git.Worktree) (bool, *airer.Airer) {
 	status, err := wt.Status()
 	if err != nil {
 		return false, &airer.Airer{
 			airer.ExecError,
 			fmt.Sprintf("Failed to check branch status!\n%s\n", err),
+			err,
 		}
 	}
 	return len(status) == 0, nil

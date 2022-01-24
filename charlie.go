@@ -6,6 +6,7 @@ import (
 	"flag"
 	"github.com/McdonaldSeanp/charlie/auth"
 	"github.com/McdonaldSeanp/charlie/githelpers"
+	"github.com/McdonaldSeanp/charlie/container"
 )
 
 func main() {
@@ -16,6 +17,18 @@ func main() {
 	clear_branch := fs.Bool("clear", false, "use --clear with 'set branch' to delete any changes in work tree")
 
 	switch os.Args[1] {
+		case "commit":
+			switch os.Args[2] {
+				case "all":
+					err := githelpers.CommitAll()
+					if err != nil {
+						fmt.Printf("Did not commit!\n%s\n", err)
+						os.Exit(1)
+					}
+				default:
+					fmt.Printf("Unknown noun!\n")
+					os.Exit(1)
+			}
 		case "load":
 			switch os.Args[2] {
 				case "yubikey":
@@ -41,6 +54,18 @@ func main() {
 					fmt.Printf("Unknown noun!\n")
 					os.Exit(1)
 			}
+		case "start":
+			switch os.Args[2] {
+			case "docker":
+				err := container.StartDocker()
+				if err != nil {
+					fmt.Printf("Could not start docker!\n%s\n", err)
+					os.Exit(1)
+				}
+			default:
+				fmt.Printf("Unknown noun!\n")
+				os.Exit(1)
+		}
 		default:
 			fmt.Printf("Unknown command!\n")
 			os.Exit(1)

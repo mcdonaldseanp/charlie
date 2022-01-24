@@ -8,24 +8,31 @@ import (
 	"github.com/McdonaldSeanp/charlie/airer"
 )
 
-func FindYubikeyBUSID() (string, error) {
-	output, err := utils.ExecReadOutput(exec.Command("usbipd.exe", "wsl", "list"))
-	if err != nil { return "", err }
+func FindYubikeyBUSID() (string, *airer.Airer) {
+	airr := utils.StartService("usbipd")
+	if airr != nil {
+		return "", airr
+	}
+	output, airr := utils.ExecReadOutput(exec.Command("usbipd.exe", "wsl", "list"))
+	if airr != nil { return "", airr }
 	return strings.Split(utils.LineWithSubStr(output, "Smartcard Reader"), " ")[0], nil
 }
 
-func ConnectYubikey() (error) {
-	bus_id, err := FindYubikeyBUSID()
-	if err != nil { return err }
+func ConnectYubikey() (*airer.Airer) {
+	bus_id, airr := FindYubikeyBUSID()
+	if airr != nil {
+		return airr
+	}
 	if bus_id == "" {
 		return &airer.Airer{
 			airer.ExecError,
-			fmt.Sprintf("ERROR Unable to find Yubikey BUSID, cannot continue\n"),
+			fmt.Sprintf("airrOR Unable to find Yubikey BUSID, cannot continue\n"),
+			nil,
 		}
 	}
-	err = utils.ExecAsShell(exec.Command("usbipd.exe", "wsl", "attach", "--busid", bus_id))
-	if err != nil { return err }
-	err = utils.ExecAsShell(exec.Command("sudo", "service", "pcscd", "restart"))
-	if err != nil { return err }
+	airr = utils.ExecAsShell(exec.Command("usbipd.exe", "wsl", "attach", "--busid", bus_id))
+	if airr != nil { return airr }
+	airr = utils.ExecAsShell(exec.Command("sudo", "service", "pcscd", "restart"))
+	if airr != nil { return airr }
 	return nil
 }

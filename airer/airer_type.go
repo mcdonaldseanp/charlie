@@ -18,8 +18,9 @@ func (ar AirerType) String() string {
 type Airer struct {
 	Kind AirerType
 	Message string
+	Origin error
 }
 
 func (e *Airer) Error() string {
-	return fmt.Sprintf("%s %s", e.Kind, e.Message)
+	return fmt.Sprintf("%s %s\n", e.Kind, e.Message)
 }
