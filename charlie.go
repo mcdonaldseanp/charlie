@@ -15,6 +15,7 @@ func main() {
 	// before parsing
 	fs := flag.NewFlagSet("cli", flag.ExitOnError)
 	clear_branch := fs.Bool("clear", false, "use --clear with 'set branch' to delete any changes in work tree")
+	pull_branch := fs.Bool("pull", false, "use --pull with 'set branch' to pull from upstream")
 
 	switch os.Args[1] {
 		case "commit":
@@ -45,7 +46,7 @@ func main() {
 			switch os.Args[2] {
 				case "branch":
 					fs.Parse(os.Args[4:])
-					err := githelpers.Setgitbranch(os.Args[3], *clear_branch)
+					err := githelpers.Setgitbranch(os.Args[3], *clear_branch, *pull_branch)
 					if err != nil {
 						fmt.Printf("Did not set branch!\n%s\n", err)
 						os.Exit(1)

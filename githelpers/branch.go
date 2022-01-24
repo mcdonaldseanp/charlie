@@ -8,7 +8,7 @@ import (
 )
 
 
-func Setgitbranch(branch_name string, clear bool) (*airer.Airer) {
+func Setgitbranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
 	wt, airr := OpenWorktree()
 	if airr != nil { return airr }
 
@@ -29,9 +29,13 @@ func Setgitbranch(branch_name string, clear bool) (*airer.Airer) {
 	if err != nil {
 		return &airer.Airer{
 			airer.ExecError,
-			fmt.Sprintf("Failed to check out branch!\n%s\n", err),
+			fmt.Sprintf("Failed to check out branch!\n%s", err),
 			err,
 		}
+	}
+	if pull {
+		_, airr := TryFixAuth("git", "pull")
+		if airr != nil { return airr }
 	}
 	return nil
 }
@@ -41,7 +45,7 @@ func WorkTreeClean(wt *git.Worktree) (bool, *airer.Airer) {
 	if err != nil {
 		return false, &airer.Airer{
 			airer.ExecError,
-			fmt.Sprintf("Failed to check branch status!\n%s\n", err),
+			fmt.Sprintf("Failed to check branch status!\n%s", err),
 			err,
 		}
 	}

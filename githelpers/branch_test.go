@@ -4,12 +4,11 @@ import (
 	"testing"
 	"strings"
 	"os"
-	"os/exec"
 	"github.com/McdonaldSeanp/charlie/utils"
 )
 
 func initRepo(t *testing.T) {
-	_, err := utils.ExecReadOutput(exec.Command("git", "init"))
+	_, err := utils.ExecReadOutput("git", "init")
 	if err != nil {
 		t.Fatalf("Failed to create test repo: %s\n", err)
 	}
@@ -18,22 +17,22 @@ func initRepo(t *testing.T) {
 		t.Fatalf("Failed to create test repo: %s\n", err)
 	}
 	f.Close()
-	_, err = utils.ExecReadOutput(exec.Command("git", "add", "--all"))
+	_, err = utils.ExecReadOutput("git", "add", "--all")
 	if err != nil {
 		t.Fatalf("Failed to create test repo: %s\n", err)
 	}
-	_, err = utils.ExecReadOutput(exec.Command("git", "commit", "-m", "initial", "--no-gpg-sign"))
+	_, err = utils.ExecReadOutput("git", "commit", "-m", "initial", "--no-gpg-sign")
 	if err != nil {
 		t.Fatalf("Failed to create test repo: %s\n", err)
 	}
-	_, err = utils.ExecReadOutput(exec.Command("git", "checkout", "-B", "main"))
+	_, err = utils.ExecReadOutput("git", "checkout", "-B", "main")
 	if err != nil {
 		t.Fatalf("Failed to create test repo: %s\n", err)
 	}
 }
 
 func getBranch(t *testing.T) string {
-	result, err := utils.ExecReadOutput(exec.Command("git", "rev-parse", "--abbrev-ref", "HEAD"))
+	result, err := utils.ExecReadOutput("git", "rev-parse", "--abbrev-ref", "HEAD")
 	if err != nil {
 		t.Fatalf("Failed to read branch: %s\n", err)
 	}
@@ -42,11 +41,11 @@ func getBranch(t *testing.T) string {
 
 func fakeCommit(dir string, t *testing.T) {
 	fakeFile(dir, t)
-	_, err := utils.ExecReadOutput(exec.Command("git", "add", "--all"))
+	_, err := utils.ExecReadOutput("git", "add", "--all")
 	if err != nil {
 		t.Fatalf("Failed to create new commit: %s\n", err)
 	}
-	_, err = utils.ExecReadOutput(exec.Command("git", "commit", "-m", "fake", "--no-gpg-sign"))
+	_, err = utils.ExecReadOutput("git", "commit", "-m", "fake", "--no-gpg-sign")
 	if err != nil {
 		t.Fatalf("Failed to create new commit: %s\n", err)
 	}
@@ -118,7 +117,7 @@ func TestBranchDifferent(t *testing.T) {
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, err := utils.ExecReadOutput(exec.Command("git", "checkout", "-B", "different"))
+	_, err := utils.ExecReadOutput("git", "checkout", "-B", "different")
 	if err != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", err)
 	}
@@ -148,7 +147,7 @@ func TestBranchDirty(t *testing.T) {
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, err := utils.ExecReadOutput(exec.Command("git", "checkout", "-B", "different"))
+	_, err := utils.ExecReadOutput("git", "checkout", "-B", "different")
 	if err != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", err)
 	}
@@ -180,7 +179,7 @@ func TestBranchClear(t *testing.T) {
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, err := utils.ExecReadOutput(exec.Command("git", "checkout", "-B", "different"))
+	_, err := utils.ExecReadOutput("git", "checkout", "-B", "different")
 	if err != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", err)
 	}

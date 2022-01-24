@@ -9,10 +9,11 @@ type AirerType int
 const (
 	ShellError AirerType = iota
 	ExecError
+	CompletedError
 )
 
 func (ar AirerType) String() string {
-	return []string{"Shell command failed:", "Execution failure:"}[ar]
+	return []string{"Shell command failed:", "Execution failed:", "Already done:"}[ar]
 }
 
 type Airer struct {
@@ -22,5 +23,5 @@ type Airer struct {
 }
 
 func (e *Airer) Error() string {
-	return fmt.Sprintf("%s %s\n", e.Kind, e.Message)
+	return fmt.Sprintf("%s\n%s\n", e.Kind, e.Message)
 }

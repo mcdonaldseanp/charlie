@@ -2,7 +2,6 @@ package githelpers
 
 import (
 	"fmt"
-	"os/exec"
 	"github.com/McdonaldSeanp/charlie/airer"
 	"github.com/McdonaldSeanp/charlie/utils"
 )
@@ -11,7 +10,7 @@ func CommitAll() (*airer.Airer) {
 	airr := AddAllToWorkTree()
 	if airr != nil { return airr }
 	// Use the shell 'git commit' so that it will open vi to edit the message
-	airr = utils.ExecAsShell(exec.Command("git", "commit"))
+	airr = utils.ExecAsShell("git", "commit")
 	if airr != nil { return airr }
 	return nil
 }

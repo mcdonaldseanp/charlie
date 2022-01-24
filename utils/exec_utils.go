@@ -8,7 +8,8 @@ import (
 	"github.com/McdonaldSeanp/charlie/airer"
 )
 
-func ExecAsShell(shell_command *exec.Cmd) (*airer.Airer) {
+func ExecAsShell(command_string string, params ...string) (*airer.Airer) {
+	shell_command := exec.Command(command_string, params...)
 	shell_command.Stdout = os.Stdout
 	shell_command.Stderr = os.Stderr
 	shell_command.Stdin = os.Stdin
@@ -23,7 +24,8 @@ func ExecAsShell(shell_command *exec.Cmd) (*airer.Airer) {
 	return nil
 }
 
-func ExecReadOutput(shell_command *exec.Cmd) (string, *airer.Airer) {
+func ExecReadOutput(command_string string, params ...string) (string, *airer.Airer) {
+	shell_command := exec.Command(command_string, params...)
 	var stdout, stderr bytes.Buffer
 	shell_command.Stdout = &stdout
 	shell_command.Stderr = &stderr
@@ -32,19 +34,20 @@ func ExecReadOutput(shell_command *exec.Cmd) (string, *airer.Airer) {
 	if err != nil {
 		return output, &airer.Airer{
 			airer.ShellError,
-			fmt.Sprintf("ERROR '%s' failed: %s\n\nstderr: %s\n", shell_command, err, string(stderr.Bytes())),
+			fmt.Sprintf("Command '%s' failed:\n%s\nstderr:\n%s", shell_command, err, string(stderr.Bytes())),
 			err,
 		}
 	}
 	return output, nil
 }
 
-func ExecDetached(shell_command *exec.Cmd) (*airer.Airer) {
+func ExecDetached(command_string string, params ...string) (*airer.Airer) {
+	shell_command := exec.Command(command_string, params...)
 	err := shell_command.Start()
 	if err != nil {
 		return &airer.Airer{
 			airer.ShellError,
-			fmt.Sprintf("ERROR '%s' failed to start: %s\n", shell_command, err),
+			fmt.Sprintf("Command '%s' failed to start:\n%s", shell_command, err),
 			err,
 		}
 	}
