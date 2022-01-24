@@ -18,7 +18,19 @@ func main() {
 	pull_branch := fs.Bool("pull", false, "use --pull with 'set branch' to pull from upstream")
 
 	switch os.Args[1] {
-		case "commit":
+		case "auth":
+			switch os.Args[2] {
+				case "gcloud":
+					err := container.AuthorizeGcloud()
+					if err != nil {
+						fmt.Printf("Did not authorize!\n%s\n", err)
+						os.Exit(1)
+					}
+				default:
+					fmt.Printf("Unknown noun!\n")
+					os.Exit(1)
+			}
+			case "commit":
 			switch os.Args[2] {
 				case "all":
 					err := githelpers.CommitAll()
@@ -47,6 +59,12 @@ func main() {
 				case "branch":
 					fs.Parse(os.Args[4:])
 					err := githelpers.Setgitbranch(os.Args[3], *clear_branch, *pull_branch)
+					if err != nil {
+						fmt.Printf("Did not set branch!\n%s\n", err)
+						os.Exit(1)
+					}
+				case "clustersize":
+					err := container.ResizeGKECluster(os.Getenv("MY_CLUSTER"), os.Args[3])
 					if err != nil {
 						fmt.Printf("Did not set branch!\n%s\n", err)
 						os.Exit(1)
