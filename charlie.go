@@ -50,12 +50,32 @@ func main() {
 					}
 					os.Exit(0)
 			}
+		case "disconnect":
+			switch os.Args[2] {
+				case "pod":
+					err := container.DisconnectPod(os.Args[3])
+					if err != nil {
+						fmt.Printf("Could not stop pod forwarding!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+			}
 		case "mount":
 			switch os.Args[2] {
 				case "yubikey":
 					err := auth.MountYubikey()
 					if err != nil {
 						fmt.Printf("Did not mount yubikey!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+			}
+		case "repair":
+			switch os.Args[2] {
+				case "yubikey":
+					err := auth.RepairYubikey()
+					if err != nil {
+						fmt.Printf("Could not repair yubikey!\n%s\n", err)
 						os.Exit(1)
 					}
 					os.Exit(0)
@@ -87,16 +107,6 @@ func main() {
 					err := container.StartDocker()
 					if err != nil {
 						fmt.Printf("Could not start docker!\n%s\n", err)
-						os.Exit(1)
-					}
-					os.Exit(0)
-			}
-		case "disconnect":
-			switch os.Args[2] {
-				case "pod":
-					err := container.DisconnectPod(os.Args[3])
-					if err != nil {
-						fmt.Printf("Could not stop pod forwarding!\n%s\n", err)
 						os.Exit(1)
 					}
 					os.Exit(0)
