@@ -8,7 +8,7 @@ import (
 func StartDocker() (*airer.Airer) {
 	airr := utils.StartService("com.docker.service")
 	if airr != nil { return airr }
-	airr = utils.ExecDetached("/c/Program Files/Docker/Docker/Docker Desktop.exe")
+	_, airr = utils.ExecDetached("/c/Program Files/Docker/Docker/Docker Desktop.exe")
 	if airr != nil { return airr }
 	return nil
 }

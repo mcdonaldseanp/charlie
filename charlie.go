@@ -42,6 +42,12 @@ func main() {
 					fmt.Printf("Unknown noun!\n")
 					os.Exit(1)
 			}
+		case "forward":
+			err := container.ForwardCygnusPort(os.Args[2])
+			if err != nil {
+				fmt.Printf("Did not forward pod!\n%s\n", err)
+				os.Exit(1)
+			}
 		case "load":
 			switch os.Args[2] {
 				case "yubikey":
@@ -79,6 +85,18 @@ func main() {
 				err := container.StartDocker()
 				if err != nil {
 					fmt.Printf("Could not start docker!\n%s\n", err)
+					os.Exit(1)
+				}
+			default:
+				fmt.Printf("Unknown noun!\n")
+				os.Exit(1)
+		}
+		case "stop":
+			switch os.Args[2] {
+			case "forwarding":
+				err := container.StopCygnusPortForward(os.Args[3])
+				if err != nil {
+					fmt.Printf("Could not stop pod forward!\n%s\n", err)
 					os.Exit(1)
 				}
 			default:

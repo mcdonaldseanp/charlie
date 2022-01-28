@@ -41,15 +41,15 @@ func ExecReadOutput(command_string string, params ...string) (string, *airer.Air
 	return output, nil
 }
 
-func ExecDetached(command_string string, params ...string) (*airer.Airer) {
+func ExecDetached(command_string string, params ...string) (*exec.Cmd, *airer.Airer) {
 	shell_command := exec.Command(command_string, params...)
 	err := shell_command.Start()
 	if err != nil {
-		return &airer.Airer{
+		return nil, &airer.Airer{
 			airer.ShellError,
 			fmt.Sprintf("Command '%s' failed to start:\n%s", shell_command, err),
 			err,
 		}
 	}
-	return nil
+	return shell_command, nil
 }
