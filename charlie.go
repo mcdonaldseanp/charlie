@@ -17,95 +17,91 @@ func main() {
 	clear_branch := fs.Bool("clear", false, "use --clear with 'set branch' to delete any changes in work tree")
 	pull_branch := fs.Bool("pull", false, "use --pull with 'set branch' to pull from upstream")
 
+	// All CLI commands should follow naming rules of powershell approved verbs:
+	// https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.2
 	switch os.Args[1] {
-		case "auth":
+		case "initialize":
 			switch os.Args[2] {
 				case "gcloud":
-					err := container.AuthorizeGcloud()
+					err := container.InitializeGcloud()
 					if err != nil {
 						fmt.Printf("Did not authorize!\n%s\n", err)
 						os.Exit(1)
 					}
-				default:
-					fmt.Printf("Unknown noun!\n")
-					os.Exit(1)
+					os.Exit(0)
 			}
-			case "commit":
+		case "new":
 			switch os.Args[2] {
-				case "all":
-					err := githelpers.CommitAll()
+				case "commit":
+					err := githelpers.NewCommit()
 					if err != nil {
 						fmt.Printf("Did not commit!\n%s\n", err)
 						os.Exit(1)
 					}
-				default:
-					fmt.Printf("Unknown noun!\n")
-					os.Exit(1)
+					os.Exit(0)
 			}
-		case "forward":
-			err := container.ForwardCygnusPort(os.Args[2])
-			if err != nil {
-				fmt.Printf("Did not forward pod!\n%s\n", err)
-				os.Exit(1)
-			}
-		case "load":
+		case "connect":
 			switch os.Args[2] {
-				case "yubikey":
-					err := auth.ConnectYubikey()
+				case "pod":
+					err := container.ConnectPod(os.Args[3])
 					if err != nil {
-						fmt.Printf("Did not load yubikey!\n%s\n", err)
+						fmt.Printf("Did not forward pod!\n%s\n", err)
 						os.Exit(1)
 					}
-				default:
-					fmt.Printf("Unknown noun!\n")
-					os.Exit(1)
+					os.Exit(0)
+			}
+		case "mount":
+			switch os.Args[2] {
+				case "yubikey":
+					err := auth.MountYubikey()
+					if err != nil {
+						fmt.Printf("Did not mount yubikey!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+			}
+		case "resize":
+			switch os.Args[2] {
+				case "cluster":
+					err := container.ResizeCluster(os.Getenv("MY_CLUSTER"), os.Args[3])
+					if err != nil {
+						fmt.Printf("Did not resize cluster!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
 			}
 		case "set":
 			switch os.Args[2] {
 				case "branch":
 					fs.Parse(os.Args[4:])
-					err := githelpers.Setgitbranch(os.Args[3], *clear_branch, *pull_branch)
+					err := githelpers.SetBranch(os.Args[3], *clear_branch, *pull_branch)
 					if err != nil {
 						fmt.Printf("Did not set branch!\n%s\n", err)
 						os.Exit(1)
 					}
-				case "clustersize":
-					err := container.ResizeGKECluster(os.Getenv("MY_CLUSTER"), os.Args[3])
-					if err != nil {
-						fmt.Printf("Did not set branch!\n%s\n", err)
-						os.Exit(1)
-					}
-				default:
-					fmt.Printf("Unknown noun!\n")
-					os.Exit(1)
+					os.Exit(0)
 			}
 		case "start":
 			switch os.Args[2] {
-			case "docker":
-				err := container.StartDocker()
-				if err != nil {
-					fmt.Printf("Could not start docker!\n%s\n", err)
-					os.Exit(1)
-				}
-			default:
-				fmt.Printf("Unknown noun!\n")
-				os.Exit(1)
-		}
-		case "stop":
+				case "docker":
+					err := container.StartDocker()
+					if err != nil {
+						fmt.Printf("Could not start docker!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+			}
+		case "disconnect":
 			switch os.Args[2] {
-			case "forwarding":
-				err := container.StopCygnusPortForward(os.Args[3])
-				if err != nil {
-					fmt.Printf("Could not stop pod forward!\n%s\n", err)
-					os.Exit(1)
-				}
-			default:
-				fmt.Printf("Unknown noun!\n")
-				os.Exit(1)
-		}
-		default:
-			fmt.Printf("Unknown command!\n")
-			os.Exit(1)
+				case "pod":
+					err := container.DisconnectPod(os.Args[3])
+					if err != nil {
+						fmt.Printf("Could not stop pod forwarding!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+			}
 	}
-	os.Exit(0)
+	fmt.Printf("Unknown command!\n")
+	os.Exit(1)
 }

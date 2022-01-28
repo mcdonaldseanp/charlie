@@ -6,8 +6,8 @@ import (
 	"github.com/McdonaldSeanp/charlie/utils"
 )
 
-func CommitAll() (*airer.Airer) {
-	airr := AddAllToWorkTree()
+func NewCommit() (*airer.Airer) {
+	airr := addAllToWorkTree()
 	if airr != nil { return airr }
 	// Use the shell 'git commit' so that it will open vi to edit the message
 	airr = utils.ExecAsShell("git", "commit")
@@ -15,8 +15,8 @@ func CommitAll() (*airer.Airer) {
 	return nil
 }
 
-func AddAllToWorkTree() (*airer.Airer) {
-	wt, airr := OpenWorktree()
+func addAllToWorkTree() (*airer.Airer) {
+	wt, airr := utils.OpenWorktree()
 	if airr != nil { return airr }
 
 	status, err := wt.Status()
@@ -35,11 +35,11 @@ func AddAllToWorkTree() (*airer.Airer) {
 		}
 	}
 	for filename, _ := range status {
-		err := wt.AddGlob(filename)
+		_, err := wt.Add(filename)
 		if err != nil {
 			return &airer.Airer{
 				airer.ExecError,
-				fmt.Sprintf("Failed to 'git add' file %s!\n%s\n", filename, err),
+				fmt.Sprintf("Failed git operation with file %s!\n%s\n", filename, err),
 				err,
 			}
 		}

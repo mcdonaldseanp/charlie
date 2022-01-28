@@ -5,14 +5,16 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/McdonaldSeanp/charlie/airer"
+	"github.com/McdonaldSeanp/charlie/auth"
+	"github.com/McdonaldSeanp/charlie/utils"
 )
 
 
-func Setgitbranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
-	wt, airr := OpenWorktree()
+func SetBranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
+	wt, airr := utils.OpenWorktree()
 	if airr != nil { return airr }
 
-	clean, airr := WorkTreeClean(wt)
+	clean, airr := utils.WorkTreeClean(wt)
 	if airr != nil { return airr }
 	if !clean && !clear {
 		return &airer.Airer{
@@ -34,20 +36,8 @@ func Setgitbranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
 		}
 	}
 	if pull {
-		_, airr := TryFixAuth("git", "pull")
+		_, airr := auth.TryFixAuth("git", "pull")
 		if airr != nil { return airr }
 	}
 	return nil
-}
-
-func WorkTreeClean(wt *git.Worktree) (bool, *airer.Airer) {
-	status, err := wt.Status()
-	if err != nil {
-		return false, &airer.Airer{
-			airer.ExecError,
-			fmt.Sprintf("Failed to check branch status!\n%s", err),
-			err,
-		}
-	}
-	return len(status) == 0, nil
 }

@@ -8,7 +8,7 @@ import (
 	"github.com/McdonaldSeanp/charlie/airer"
 )
 
-func ForwardPodPort(podname string, port string) (*airer.Airer) {
+func forwardPodPort(podname string, port string) (*airer.Airer) {
 	forwarded_pods_file := os.Getenv("HOME") + "/.forwarded_pods"
 	cmd, airr := utils.ExecDetached("kubectl", "port-forward", "pod/" + podname, port + ":" + port)
 	if airr != nil { return airr }
@@ -22,7 +22,7 @@ func ForwardPodPort(podname string, port string) (*airer.Airer) {
 	return utils.OverwriteJSONFile(forwarded_pods_file, forwarded_pods)
 }
 
-func StopForwardingPod(podname string) (*airer.Airer) {
+func stopForwardingPod(podname string) (*airer.Airer) {
 	forwarded_pods_file := os.Getenv("HOME") + "/.forwarded_pods"
 	forwarded_pods, airr := utils.ReadJSONFile(forwarded_pods_file)
 	if airr != nil { return airr }
@@ -61,10 +61,10 @@ func StopForwardingPod(podname string) (*airer.Airer) {
 	return utils.OverwriteJSONFile(forwarded_pods_file, forwarded_pods)
 }
 
-func ForwardCygnusPort(podname string) (*airer.Airer) {
+func ConnectPod(podname string) (*airer.Airer) {
 	switch podname {
 		case "director":
-			return ForwardPodPort("pe-orchestration-services-0", "8143")
+			return forwardPodPort("pe-orchestration-services-0", "8143")
 		default:
 			return &airer.Airer{
 				airer.ExecError,
@@ -74,10 +74,10 @@ func ForwardCygnusPort(podname string) (*airer.Airer) {
 	}
 }
 
-func StopCygnusPortForward(podname string) (*airer.Airer) {
+func DisconnectPod(podname string) (*airer.Airer) {
 	switch podname {
 		case "director":
-			return StopForwardingPod("pe-orchestration-services-0")
+			return stopForwardingPod("pe-orchestration-services-0")
 		default:
 			return &airer.Airer{
 				airer.ExecError,
