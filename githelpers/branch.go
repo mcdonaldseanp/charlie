@@ -9,7 +9,6 @@ import (
 	"github.com/McdonaldSeanp/charlie/utils"
 )
 
-
 func SetBranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
 	wt, airr := utils.OpenWorktree()
 	if airr != nil { return airr }
@@ -40,4 +39,11 @@ func SetBranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
 		if airr != nil { return airr }
 	}
 	return nil
+}
+
+func GetPR(pr_name string, clear bool) (*airer.Airer) {
+	new_branch_name := "PR" + pr_name
+	airr := utils.ExecAsShell("git", "fetch", "upstream", "pull/" + pr_name + "/head:" + new_branch_name)
+	if airr != nil { return airr }
+	return SetBranch(new_branch_name, clear, false)
 }

@@ -19,27 +19,9 @@ func main() {
 
 	// All CLI commands should follow naming rules of powershell approved verbs:
 	// https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.2
+	//
+	// Also, try to keep these in alphabetical order. The list is already long enough
 	switch os.Args[1] {
-		case "initialize":
-			switch os.Args[2] {
-				case "gcloud":
-					err := container.InitializeGcloud()
-					if err != nil {
-						fmt.Printf("Did not authorize!\n%s\n", err)
-						os.Exit(1)
-					}
-					os.Exit(0)
-			}
-		case "new":
-			switch os.Args[2] {
-				case "commit":
-					err := githelpers.NewCommit()
-					if err != nil {
-						fmt.Printf("Did not commit!\n%s\n", err)
-						os.Exit(1)
-					}
-					os.Exit(0)
-			}
 		case "connect":
 			switch os.Args[2] {
 				case "pod":
@@ -60,12 +42,43 @@ func main() {
 					}
 					os.Exit(0)
 			}
+		case "get":
+			switch os.Args[2] {
+				case "pr":
+					fs.Parse(os.Args[4:])
+					err := githelpers.GetPR(os.Args[3], *clear_branch)
+					if err != nil {
+						fmt.Printf("Did not get PR!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+			}
+		case "initialize":
+			switch os.Args[2] {
+				case "gcloud":
+					err := container.InitializeGcloud()
+					if err != nil {
+						fmt.Printf("Did not authorize!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+			}
 		case "mount":
 			switch os.Args[2] {
 				case "yubikey":
 					err := auth.MountYubikey()
 					if err != nil {
 						fmt.Printf("Did not mount yubikey!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+			}
+		case "new":
+			switch os.Args[2] {
+				case "commit":
+					err := githelpers.NewCommit()
+					if err != nil {
+						fmt.Printf("Did not commit!\n%s\n", err)
 						os.Exit(1)
 					}
 					os.Exit(0)
