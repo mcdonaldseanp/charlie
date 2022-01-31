@@ -7,6 +7,7 @@ import (
 	"github.com/McdonaldSeanp/charlie/auth"
 	"github.com/McdonaldSeanp/charlie/githelpers"
 	"github.com/McdonaldSeanp/charlie/container"
+	"github.com/McdonaldSeanp/charlie/cygnus"
 )
 
 func main() {
@@ -25,7 +26,14 @@ func main() {
 		case "connect":
 			switch os.Args[2] {
 				case "pod":
-					err := container.ConnectPod(os.Args[3])
+					err := container.ConnectPod(os.Args[3], os.Args[4])
+					if err != nil {
+						fmt.Printf("Did not forward pod!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+				case "cypod":
+					err := cygnus.ConnectCygnusPod(os.Args[3])
 					if err != nil {
 						fmt.Printf("Did not forward pod!\n%s\n", err)
 						os.Exit(1)
@@ -36,6 +44,13 @@ func main() {
 			switch os.Args[2] {
 				case "pod":
 					err := container.DisconnectPod(os.Args[3])
+					if err != nil {
+						fmt.Printf("Could not stop pod forwarding!\n%s\n", err)
+						os.Exit(1)
+					}
+					os.Exit(0)
+				case "cypod":
+					err := cygnus.DisconnectCygnusPod(os.Args[3])
 					if err != nil {
 						fmt.Printf("Could not stop pod forwarding!\n%s\n", err)
 						os.Exit(1)
