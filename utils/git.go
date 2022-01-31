@@ -3,7 +3,10 @@ package utils
 import (
 	"os"
 	"fmt"
+	"path/filepath"
 	"github.com/go-git/go-git/v5"
+	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
+	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/McdonaldSeanp/charlie/airer"
 )
 
@@ -39,6 +42,17 @@ func OpenWorktree() (*git.Worktree, *airer.Airer) {
 			err,
 		}
 	}
+	// Load the global gitignore and ensure the excludes patterns
+	// in the work tree include the global patterns
+	global_patterns, err := gitignore.LoadGlobalPatterns(osfs.New(filepath.Dir("/")))
+	if err != nil {
+		return nil, &airer.Airer{
+			airer.ExecError,
+			fmt.Sprintf("Failed to load work tree!\n%s", err),
+			err,
+		}
+	}
+	wt.Excludes = global_patterns
 	return wt, nil
 }
 
