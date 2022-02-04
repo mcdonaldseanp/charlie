@@ -3,17 +3,17 @@ package auth
 import (
 	"fmt"
 	"strings"
-	"github.com/McdonaldSeanp/charlie/utils"
-	"github.com/McdonaldSeanp/charlie/airer"
+	. "github.com/McdonaldSeanp/charlie/utils"
+	. "github.com/McdonaldSeanp/charlie/airer"
 )
 
-func findYubikeyBUSID() (string, *airer.Airer) {
-	output, airr := utils.ExecReadOutput("usbipd.exe", "wsl", "list")
+func findYubikeyBUSID() (string, *Airer) {
+	output, airr := ExecReadOutput("usbipd.exe", "wsl", "list")
 	if airr != nil { return "", airr }
-	substr := utils.LineWithSubStr(output, "Smartcard Reader")
+	substr := LineWithSubStr(output, "Smartcard Reader")
 	if substr == "" {
-		return "", &airer.Airer{
-			airer.ExecError,
+		return "", &Airer{
+			ExecError,
 			fmt.Sprintf("Unable to find Yubikey BUSID, cannot continue"),
 			nil,
 		}
@@ -21,8 +21,8 @@ func findYubikeyBUSID() (string, *airer.Airer) {
 	// Double negative here: returns true if the line does not
 	// contain "Not attached"
 	if !strings.Contains(substr, "Not attached") {
-		return "", &airer.Airer{
-			airer.CompletedError,
+		return "", &Airer{
+			CompletedError,
 			"Yubikey already attached",
 			nil,
 		}
@@ -30,8 +30,8 @@ func findYubikeyBUSID() (string, *airer.Airer) {
 	return strings.Split(substr, " ")[0], nil
 }
 
-func MountYubikey() (*airer.Airer) {
-	airr := utils.StartService("usbipd")
+func MountYubikey() (*Airer) {
+	airr := StartService("usbipd")
 	if airr != nil {
 		return airr
 	}
@@ -39,29 +39,29 @@ func MountYubikey() (*airer.Airer) {
 	if airr != nil {
 		return airr
 	}
-	airr = utils.ExecAsShell("usbipd.exe", "wsl", "attach", "--busid", bus_id)
+	airr = ExecAsShell("usbipd.exe", "wsl", "attach", "--busid", bus_id)
 	if airr != nil { return airr }
-	airr = utils.ExecAsShell("sudo", "service", "pcscd", "restart")
+	airr = ExecAsShell("sudo", "service", "pcscd", "restart")
 	if airr != nil { return airr }
 	return nil
 }
 
-func TryFixAuth(attempt_command string, params ...string) (string, *airer.Airer) {
-	output, airr := utils.ExecReadOutput(attempt_command, params...)
+func TryFixAuth(attempt_command string, params ...string) (string, *Airer) {
+	output, airr := ExecReadOutput(attempt_command, params...)
 	if airr != nil {
 		airr = RepairYubikey()
 		if airr != nil {
-			return "", &airer.Airer{
-				airer.ExecError,
+			return "", &Airer{
+				ExecError,
 				fmt.Sprintf("Attempted to repair yubikey connection but failed\n%s", airr.Message),
 				airr,
 			}
 		}
 		// Make another attempt
-		output, airr = utils.ExecReadOutput(attempt_command, params...)
+		output, airr = ExecReadOutput(attempt_command, params...)
 		if airr != nil {
-			return "", &airer.Airer{
-				airer.ExecError,
+			return "", &Airer{
+				ExecError,
 				fmt.Sprintf("Attempted to repair yubikey connection but failed\n%s", airr.Message),
 				airr,
 			}
@@ -70,14 +70,14 @@ func TryFixAuth(attempt_command string, params ...string) (string, *airer.Airer)
 	return output, nil
 }
 
-func RepairYubikey() (*airer.Airer) {
+func RepairYubikey() (*Airer) {
 	// Make an attempt to load the yubikey in case that's the problem
 	airr := MountYubikey()
 	if airr != nil {
-		if airr.Kind != airer.CompletedError {
+		if airr.Kind != CompletedError {
 			// Yubikey didn't load, can't fix
-			return &airer.Airer{
-				airer.ExecError,
+			return &Airer{
+				ExecError,
 				fmt.Sprintf("Yubikey could not be mounted:\n%s", airr.Message),
 				airr,
 			}
@@ -85,11 +85,11 @@ func RepairYubikey() (*airer.Airer) {
 		// If it was already connected, we can continue
 	}
 	// Also try to unfuck gpg
-	_, airr = utils.ExecReadOutput("gpg-connect-agent", "updatestartuptty", "/bye")
+	_, airr = ExecReadOutput("gpg-connect-agent", "updatestartuptty", "/bye")
 	if airr != nil {
 		// Definately fucked
-		return &airer.Airer{
-			airer.ExecError,
+		return &Airer{
+			ExecError,
 			fmt.Sprintf("Attempt to repair GPG failed:\n%s", airr.Message),
 			airr,
 		}

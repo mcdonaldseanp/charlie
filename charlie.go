@@ -4,12 +4,12 @@ import (
 	"os"
 	"fmt"
 	"flag"
-	"github.com/McdonaldSeanp/charlie/airer"
 	"github.com/McdonaldSeanp/charlie/auth"
 	"github.com/McdonaldSeanp/charlie/container"
 	"github.com/McdonaldSeanp/charlie/cygnus"
 	"github.com/McdonaldSeanp/charlie/gcloud"
 	"github.com/McdonaldSeanp/charlie/githelpers"
+	. "github.com/McdonaldSeanp/charlie/airer"
 )
 func shouldHaveArgs(num_args int, usage string, description string, flagset *flag.FlagSet) {
 	real_args := num_args + 1
@@ -36,10 +36,10 @@ func shouldHaveArgs(num_args int, usage string, description string, flagset *fla
 	}
 }
 
-func handleCommand(airr *airer.Airer, usage string, description string, flagset *flag.FlagSet) {
+func handleCommand(airr *Airer, usage string, description string, flagset *flag.FlagSet) {
 	if airr != nil {
-		if airr.Kind == airer.InvalidInput {
-			fmt.Printf("Invalid input, error: %s.\n\nUsage:\n  %s\n\nDescription:\n  %s\n\n", airr, usage, description)
+		if airr.Kind == InvalidInput {
+			fmt.Printf("%s\nUsage:\n  %s\n\nDescription:\n  %s\n\n", airr, usage, description)
 			if flagset != nil {
 				flagset.PrintDefaults()
 			}

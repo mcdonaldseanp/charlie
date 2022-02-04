@@ -4,20 +4,20 @@ import (
 	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/McdonaldSeanp/charlie/airer"
 	"github.com/McdonaldSeanp/charlie/auth"
-	"github.com/McdonaldSeanp/charlie/utils"
+	. "github.com/McdonaldSeanp/charlie/utils"
+  . "github.com/McdonaldSeanp/charlie/airer"
 )
 
-func SetBranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
-	wt, airr := utils.OpenWorktree()
+func SetBranch(branch_name string, clear bool, pull bool) (*Airer) {
+	wt, airr := OpenWorktree()
 	if airr != nil { return airr }
 
-	clean, airr := utils.WorkTreeClean(wt)
+	clean, airr := WorkTreeClean(wt)
 	if airr != nil { return airr }
 	if !clean && !clear {
-		return &airer.Airer{
-			airer.ExecError,
+		return &Airer{
+			ExecError,
 			fmt.Sprintf("Cannot switch branch when work tree is not clean"),
 			nil,
 		}
@@ -28,8 +28,8 @@ func SetBranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
 		Keep: false,
 	})
 	if err != nil {
-		return &airer.Airer{
-			airer.ExecError,
+		return &Airer{
+			ExecError,
 			fmt.Sprintf("Failed to check out branch!\n%s", err),
 			err,
 		}
@@ -41,9 +41,9 @@ func SetBranch(branch_name string, clear bool, pull bool) (*airer.Airer) {
 	return nil
 }
 
-func GetPR(pr_name string, clear bool) (*airer.Airer) {
+func GetPR(pr_name string, clear bool) (*Airer) {
 	new_branch_name := "PR" + pr_name
-	airr := utils.ExecAsShell("git", "fetch", "upstream", "pull/" + pr_name + "/head:" + new_branch_name)
+	airr := ExecAsShell("git", "fetch", "upstream", "pull/" + pr_name + "/head:" + new_branch_name)
 	if airr != nil { return airr }
 	return SetBranch(new_branch_name, clear, false)
 }

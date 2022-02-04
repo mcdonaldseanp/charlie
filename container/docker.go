@@ -1,14 +1,31 @@
 package container
 
 import (
-	"github.com/McdonaldSeanp/charlie/utils"
-	"github.com/McdonaldSeanp/charlie/airer"
+	. "github.com/McdonaldSeanp/charlie/utils"
+	. "github.com/McdonaldSeanp/charlie/airer"
 )
 
-func StartDocker() (*airer.Airer) {
-	airr := utils.StartService("com.docker.service")
+func StartDocker() (*Airer) {
+	airr := StartService("com.docker.service")
 	if airr != nil { return airr }
-	_, airr = utils.ExecDetached("/c/Program Files/Docker/Docker/Docker Desktop.exe")
+	_, airr = ExecDetached("/c/Program Files/Docker/Docker/Docker Desktop.exe")
+	return airr
+}
+
+func PublishContainer(name string, tag string, registry_url string) (*Airer) {
+	airr := ValidateParams(
+		[]Validator {
+			Validator{ "name", name, []ValidateType{ NotEmpty } },
+			Validator{ "tag", tag, []ValidateType{ NotEmpty } },
+			Validator{ "registry_url", registry_url, []ValidateType{ NotEmpty } },
+		})
 	if airr != nil { return airr }
-	return nil
+	output, airr := ExecReadOutput("docker", "images", "-q")
+	if airr != nil { return airr }
+	last_image := FirstLine(output)
+	full_tag := registry_url + "/" + name + ":" + tag
+	airr = ExecAsShell("docker", "tag", last_image, full_tag)
+	if airr != nil { return airr }
+	airr = ExecAsShell("docker", "push", full_tag)
+	return airr
 }

@@ -5,14 +5,14 @@ import (
 	"os"
 	"io"
 	"encoding/json"
-	"github.com/McdonaldSeanp/charlie/airer"
+	. "github.com/McdonaldSeanp/charlie/airer"
 )
 
-func ReadJSONFile(location string) (map[string]interface{}, *airer.Airer) {
+func ReadJSONFile(location string) (map[string]interface{}, *Airer) {
 	f, err := os.OpenFile(location, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
-		return nil, &airer.Airer{
-			airer.ExecError,
+		return nil, &Airer{
+			ExecError,
 			fmt.Sprintf("Failed to open file:\n%s", err),
 			err,
 		}
@@ -26,8 +26,8 @@ func ReadJSONFile(location string) (map[string]interface{}, *airer.Airer) {
 		bytes_read, err := f.Read(byte_buffer)
 		if err != nil {
 			if err != io.EOF {
-				return nil, &airer.Airer{
-					airer.ExecError,
+				return nil, &Airer{
+					ExecError,
 					fmt.Sprintf("Failed to read file:\n%s", err),
 					err,
 				}
@@ -42,11 +42,11 @@ func ReadJSONFile(location string) (map[string]interface{}, *airer.Airer) {
 	return data, nil
 }
 
-func OverwriteJSONFile(location string, data interface{}) (*airer.Airer) {
+func OverwriteJSONFile(location string, data interface{}) (*Airer) {
 	f, err := os.OpenFile(location, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
-		return &airer.Airer{
-			airer.ExecError,
+		return &Airer{
+			ExecError,
 			fmt.Sprintf("Failed to open file:\n%s", err),
 			err,
 		}
@@ -54,16 +54,16 @@ func OverwriteJSONFile(location string, data interface{}) (*airer.Airer) {
 	defer f.Close()
 	json_string, err := json.Marshal(data)
 	if err != nil {
-		return &airer.Airer{
-			airer.ExecError,
+		return &Airer{
+			ExecError,
 			fmt.Sprintf("Failed to marshal json:\n%s", err),
 			err,
 		}
 	}
 	_, err = f.Write([]byte(json_string))
 	if err != nil {
-		return &airer.Airer{
-			airer.ExecError,
+		return &Airer{
+			ExecError,
 			fmt.Sprintf("Failed to write to file:\n%s", err),
 			err,
 		}

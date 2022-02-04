@@ -14,7 +14,7 @@ const (
 )
 
 func (ar AirerType) String() string {
-	return []string{"Shell command failed:", "Execution failed:", "Already done:"}[ar]
+	return []string{"Shell command failed:", "Execution failed:", "Already done:", "Invalid input:"}[ar]
 }
 
 type Airer struct {

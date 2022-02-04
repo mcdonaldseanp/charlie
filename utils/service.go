@@ -2,10 +2,10 @@ package utils
 
 import (
 	"os/exec"
-	"github.com/McdonaldSeanp/charlie/airer"
+	. "github.com/McdonaldSeanp/charlie/airer"
 )
 
-func StartService(service_name string) (*airer.Airer) {
+func StartService(service_name string) (*Airer) {
 	airr := ExecAsShell("net.exe", "start", service_name)
 	if airr != nil {
 		if exitError, ok := airr.Origin.(*exec.ExitError); ok {
