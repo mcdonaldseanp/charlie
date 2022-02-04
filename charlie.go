@@ -84,8 +84,9 @@ func main() {
 		"get": {"pr"},
 		"initialize": {"gcloud"},
 		"mount": {"yubikey"},
-		"new": {"commit"},
+		"new": {"commit", "cluster"},
 		"publish": {"container"},
+		"remove": {"cluster"},
 		"repair": {"yubikey"},
 		"resize": {"cluster"},
 		"set": {"branch"},
@@ -189,6 +190,16 @@ func main() {
 							"create new commit from all changes in the work tree",
 							nil,
 						)
+					case "cluster":
+						usage := "charlie new cluster [SIZE] [FLAGS]"
+						description := "Create a new GKE cluster with the given SIZE of nodes. Defaults to creating cluster with name from MY_CLUSTER env var"
+						shouldHaveArgs(3, usage, description, gcloud_fs)
+						handleCommand(
+							gcloud.NewCluster(*cluster_name, os.Args[3]),
+							usage,
+							description,
+							gcloud_fs,
+						)
 				}
 			case "publish":
 				switch os.Args[2] {
@@ -201,6 +212,19 @@ func main() {
 							usage,
 							description,
 							con_fs,
+						)
+				}
+			case "remove":
+				switch os.Args[2] {
+					case "cluster":
+						usage := "charlie remove cluster [FLAGS]"
+						description := "Remove GKE cluster. Defaults to removing cluster with name from MY_CLUSTER env var"
+						shouldHaveArgs(2, usage, description, gcloud_fs)
+						handleCommand(
+							gcloud.RemoveCluster(*cluster_name),
+							usage,
+							description,
+							gcloud_fs,
 						)
 				}
 			case "repair":

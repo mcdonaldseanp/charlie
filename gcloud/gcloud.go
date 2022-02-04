@@ -49,3 +49,12 @@ func NewCluster(cluster_name string, num_nodes string) (*Airer) {
 		"--enable-network-policy",
 	)
 }
+
+func RemoveCluster(cluster_name string) (*Airer) {
+	airr := ValidateParams(
+		[]Validator {
+			Validator{ "cluster_name", cluster_name, []ValidateType{ NotEmpty } },
+		})
+	if airr != nil { return airr }
+	return ExecAsShell("gcloud", "container", "clusters", "delete", cluster_name)
+}

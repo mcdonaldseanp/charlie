@@ -10,6 +10,13 @@ import (
 )
 
 func SetBranch(branch_name string, clear bool, pull bool) (*Airer) {
+	// Don't need to validate bool params, there will be a type error
+	// if anything other than bools are passed
+	airr := ValidateParams(
+		[]Validator {
+			Validator{ "branch_name", branch_name, []ValidateType{ NotEmpty } },
+		})
+	if airr != nil { return airr }
 	wt, airr := OpenWorktree()
 	if airr != nil { return airr }
 
@@ -42,8 +49,15 @@ func SetBranch(branch_name string, clear bool, pull bool) (*Airer) {
 }
 
 func GetPR(pr_name string, clear bool) (*Airer) {
+	// Don't need to validate bool params, there will be a type error
+	// if anything other than bools are passed
+	airr := ValidateParams(
+		[]Validator {
+			Validator{ "branch_name", pr_name, []ValidateType{ NotEmpty, IsNumber } },
+		})
+	if airr != nil { return airr }
 	new_branch_name := "PR" + pr_name
-	airr := ExecAsShell("git", "fetch", "upstream", "pull/" + pr_name + "/head:" + new_branch_name)
+	airr = ExecAsShell("git", "fetch", "upstream", "pull/" + pr_name + "/head:" + new_branch_name)
 	if airr != nil { return airr }
 	return SetBranch(new_branch_name, clear, false)
 }
