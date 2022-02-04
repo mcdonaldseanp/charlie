@@ -10,6 +10,7 @@ const (
 	ShellError AirerType = iota
 	ExecError
 	CompletedError
+	InvalidInput
 )
 
 func (ar AirerType) String() string {
