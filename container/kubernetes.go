@@ -12,6 +12,17 @@ func ConnectPod(podname string, port string) (*Airer) {
 	airr := ValidateParams(
 		[]Validator {
 			Validator{ "podname", podname, []ValidateType{ NotEmpty } },
+		})
+	if airr != nil { return airr }
+	// BE WARY OF INFINITE LOOPS DUE TO MATCHING NAMES
+	switch podname {
+		case "director":
+			return ConnectPod("pe-orchestration-services-0", "8143")
+	}
+	// Validate port separately in case a cygnus name was passed and port
+	// is empty on the first function call.
+	airr = ValidateParams(
+		[]Validator {
 			Validator{ "port", port, []ValidateType{ NotEmpty, IsNumber } },
 		})
 	if airr != nil { return airr }
@@ -34,6 +45,10 @@ func DisconnectPod(podname string) (*Airer) {
 			Validator{ "podname", podname, []ValidateType{ NotEmpty } },
 		})
 	if airr != nil { return airr }
+	switch podname {
+		case "director":
+			podname = "pe-orchestration-services-0"
+	}
 	forwarded_pods_file := os.Getenv("HOME") + "/.forwarded_pods"
 	forwarded_pods, airr := ReadJSONFile(forwarded_pods_file)
 	if airr != nil { return airr }

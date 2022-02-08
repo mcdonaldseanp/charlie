@@ -11,6 +11,13 @@ import (
 	"github.com/McdonaldSeanp/charlie/githelpers"
 	. "github.com/McdonaldSeanp/charlie/airer"
 )
+
+type CLICommand struct {
+	Verb string
+	Noun string
+	ExecutionFn func()
+}
+
 func shouldHaveArgs(num_args int, usage string, description string, flagset *flag.FlagSet) {
 	real_args := num_args + 1
 	passed_fs := flagset != nil
@@ -88,269 +95,242 @@ func main() {
 									"Updates the build repo to HEAD of the main branch from upstream when set")
 
 
-  // Used in unknown command usage at the bottom. Set here so that
-	// you don't forget to add it.
-	command_list := map[string][]string{
-		"connect": {"pod", "cypod"},
-		"deploy": {"cygnus"},
-		"disconnect": {"pod", "cypod"},
-		"get": {"pr"},
-		"initialize": {"gcloud"},
-		"install": {"cygnus"},
-		"mount": {"yubikey"},
-		"new": {"commit", "cluster"},
-		"publish": {"container"},
-		"remove": {"cluster"},
-		"repair": {"yubikey"},
-		"resize": {"cluster"},
-		"set": {"branch"},
-		"start": {"docker"},
-		"uninstall": {"cygnus"},
-	}
-
 	// All CLI commands should follow naming rules of powershell approved verbs:
 	// https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.2
 	//
 	// Also, try to keep these in alphabetical order. The list is already long enough
+	command_list := []CLICommand{
+		{ "connect", "pod",
+			func() {
+				usage := "charlie connect pod [POD NAME] [PORT]"
+				description := "Use kubectl port-forward to open connection to a k8s pod, PORT can be omitted\n if POD NAME is a cygnus service name"
+				// If this ever gets passed a flagset, the if statement below
+				// needs to check if os.Args[4] is expected to be a flag or not
+				shouldHaveArgs(3, usage, description, nil)
+				port_num := ""
+				if len(os.Args) >= 5 {
+					port_num = os.Args[4]
+				}
+				handleCommand(
+					container.ConnectPod(os.Args[3], port_num),
+					usage,
+					description,
+					nil,
+				)
+			},
+		},
+		{ "deploy", "cygnus",
+			func() {
+				usage := "charlie deploy cygnus [FLAGS]"
+				description := "Deploy local changes of Cygnus to GKE"
+				shouldHaveArgs(2, usage, description, cygnus_fs)
+				handleCommand(
+					cygnus.DeployCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
+					usage,
+					description,
+					cygnus_fs,
+				)
+			},
+		},
+		{ "disconnect", "pod",
+			func() {
+				usage := "charlie disconnect pod [POD NAME]"
+				description := "stop port fowarding from a k8s pod"
+				shouldHaveArgs(3, usage, description, nil)
+				handleCommand(
+					container.DisconnectPod(os.Args[3]),
+					usage,
+					description,
+					nil,
+				)
+			},
+		},
+		{ "get", "pr",
+			func() {
+				usage := "charlie get pr [PR NUMBER] [FLAGS]"
+				description := "Check out contents of a PR from github"
+				shouldHaveArgs(3, usage, description, git_fs)
+				handleCommand(
+					githelpers.GetPR(os.Args[3], *clear_branch),
+					usage,
+					description,
+					git_fs,
+				)
+			},
+		},
+		{ "initialize", "gcloud",
+			func() {
+				// Don't need to check args, since this isn't passed anything
+				handleCommand(
+					gcloud.InitializeGcloud(),
+					"charlie initialize gcloud",
+					"initialize and authorize gcloud CLI",
+					nil,
+				)
+			},
+		},
+		{ "install", "cygnus",
+			func() {
+				usage := "charlie install cygnus [FLAGS]"
+				description := "Deploy a new instance of Cygnus to GKE"
+				shouldHaveArgs(2, usage, description, cygnus_fs)
+				handleCommand(
+					cygnus.InstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
+					usage,
+					description,
+					cygnus_fs,
+				)
+			},
+		},
+		{ "mount", "yubikey",
+			func() {
+				// Don't need to check args, since this isn't passed anything
+				handleCommand(
+					auth.MountYubikey(),
+					"charlie mount yubikey",
+					"Connect yubikey to WSL instance",
+					nil,
+				)
+			},
+		},
+		{ "new", "commit",
+			func() {
+				// Don't need to check args, since this isn't passed anything
+				handleCommand(
+					githelpers.NewCommit(),
+					"charlie new commit",
+					"create new commit from all changes in the work tree",
+					nil,
+				)
+			},
+		},
+		{ "new", "cluster",
+			func() {
+				usage := "charlie new cluster [SIZE] [FLAGS]"
+				description := "Create a new GKE cluster with the given SIZE of nodes. Defaults to creating\n cluster with name from MY_CLUSTER env var"
+				shouldHaveArgs(3, usage, description, gcloud_fs)
+				handleCommand(
+					gcloud.NewCluster(*cluster_name, os.Args[3]),
+					usage,
+					description,
+					gcloud_fs,
+				)
+			},
+		},
+		{ "publish", "container",
+			func() {
+				usage := "charlie publish container [CONTAINER NAME] [NEW TAG] [FLAGS]"
+				description := "publish the container that was last built locally to a container registry.\nDefaults to using DEFAULT_CONTAINER_REGISTRY env var"
+				shouldHaveArgs(4, usage, description, con_fs)
+				handleCommand(
+					container.PublishContainer(os.Args[3], os.Args[4], *container_registry),
+					usage,
+					description,
+					con_fs,
+				)
+			},
+		},
+		{ "read", "kotsip",
+			func() {
+				usage := "charlie read kotsip"
+				description := "Read the ip that KOTS_IP should be set to"
+				// Don't need to check args, since this isn't passed anything
+				handleCommand(
+					cygnus.ReadKOTSIP(),
+					usage,
+					description,
+					nil,
+				)
+			},
+		},
+		{ "remove", "cluster",
+			func() {
+				usage := "charlie remove cluster [FLAGS]"
+				description := "Remove GKE cluster. Defaults to removing cluster with name from MY_CLUSTER \nenv var"
+				shouldHaveArgs(2, usage, description, gcloud_fs)
+				handleCommand(
+					gcloud.RemoveCluster(*cluster_name),
+					usage,
+					description,
+					gcloud_fs,
+				)
+			},
+		},
+		{ "repair", "yubikey",
+			func() {
+				// Don't need to check args, since this isn't passed anything
+				handleCommand(
+					auth.RepairYubikey(),
+					"charlie repair yubikey",
+					"attempt to repair yubikey connection to WSL instance",
+					nil,
+				)
+			},
+		},
+		{ "resize", "cluster",
+			func() {
+				usage := "charlie resize cluster [SIZE] [FLAGS]"
+				description := "resize GKE cluster to given SIZE. Defaults to resizing cluster with name \nfrom MY_CLUSTER env var"
+				shouldHaveArgs(3, usage, description, gcloud_fs)
+				handleCommand(
+					gcloud.ResizeCluster(*cluster_name, os.Args[3]),
+					usage,
+					description,
+					gcloud_fs,
+				)
+			},
+		},
+		{ "set", "branch",
+			func() {
+				pull_branch := git_fs.Bool("pull", false, "pull from upstream")
+				usage := "charlie set branch [BRANCH NAME] [FLAGS]"
+				description := "set git repo to new branch"
+				shouldHaveArgs(3, usage, description, git_fs)
+				handleCommand(
+					githelpers.SetBranch(os.Args[3], *clear_branch, *pull_branch),
+					usage,
+					description,
+					git_fs,
+				)
+			},
+		},
+		{ "start", "docker",
+			func() {
+				// Don't need to check args, since this isn't passed anything
+				handleCommand(
+					container.StartDocker(),
+					"charlie start docker",
+					"start the docker service on localhost",
+					nil,
+				)
+			},
+		},
+		{ "uninstall", "cygnus",
+			func() {
+				usage := "charlie uninstall cygnus [FLAGS]"
+				description := "Run destroy-application to tear down an existing cygnus instance"
+				shouldHaveArgs(2, usage, description, cygnus_fs)
+				handleCommand(
+					cygnus.UninstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
+					usage,
+					description,
+					cygnus_fs,
+				)
+			},
+		},
+	}
+
 	if len(os.Args) > 1 {
-		switch os.Args[1] {
-			case "connect":
-				switch os.Args[2] {
-					case "pod":
-						usage := "charlie connect pod [POD NAME] [PORT]"
-						description := "Use kubectl port-forward to open connection to a k8s pod"
-						shouldHaveArgs(4, usage, description, nil)
-						handleCommand(
-							container.ConnectPod(os.Args[3], os.Args[4]),
-							usage,
-							description,
-							nil,
-						)
-					case "cypod":
-						usage := "charlie connect cypod [CYGNUS SERVICE NAME]"
-						description := "Use kubectl port-forward to open a connection to a Cygnus k8s pod"
-						shouldHaveArgs(3, usage, description, nil)
-						handleCommand(
-							cygnus.ConnectCygnusPod(os.Args[3]),
-							usage,
-							description,
-							nil,
-						)
-				}
-			case "deploy":
-				switch os.Args[2] {
-					case "cygnus":
-						usage := "charlie deploy cygnus [FLAGS]"
-						description := "Deploy local changes of Cygnus to GKE"
-						shouldHaveArgs(2, usage, description, cygnus_fs)
-						handleCommand(
-							cygnus.DeployCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
-							usage,
-							description,
-							cygnus_fs,
-						)
-				}
-			case "disconnect":
-				switch os.Args[2] {
-					case "pod":
-						usage := "charlie disconnect pod [POD NAME]"
-						description := "stop port fowarding from a k8s pod"
-						shouldHaveArgs(3, usage, description, nil)
-						handleCommand(
-							container.DisconnectPod(os.Args[3]),
-							usage,
-							description,
-							nil,
-						)
-					case "cypod":
-						usage :=	"charlie disconnect cypod [CYGNUS SERVICE NAME]"
-						description := "stop port forwarding from a Cygnus k8s pod"
-						shouldHaveArgs(3, usage, description, nil)
-						handleCommand(
-							cygnus.DisconnectCygnusPod(os.Args[3]),
-							usage,
-							description,
-							nil,
-						)
-				}
-			case "get":
-				switch os.Args[2] {
-					case "pr":
-						usage := "charlie get pr [PR NUMBER] [FLAGS]"
-						description := "Check out contents of a PR from github"
-						shouldHaveArgs(3, usage, description, git_fs)
-						handleCommand(
-							githelpers.GetPR(os.Args[3], *clear_branch),
-							usage,
-							description,
-							git_fs,
-						)
-				}
-			case "initialize":
-				switch os.Args[2] {
-					case "gcloud":
-						// Don't need to check args, since this isn't passed anything
-						handleCommand(
-							gcloud.InitializeGcloud(),
-							"charlie initialize gcloud",
-							"initialize and authorize gcloud CLI",
-							nil,
-						)
-				}
-			case "install":
-				switch os.Args[2] {
-					case "cygnus":
-						usage := "charlie install cygnus [FLAGS]"
-						description := "Deploy a new instance of Cygnus to GKE"
-						shouldHaveArgs(2, usage, description, cygnus_fs)
-						handleCommand(
-							cygnus.InstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
-							usage,
-							description,
-							cygnus_fs,
-						)
-				}
-			case "mount":
-				switch os.Args[2] {
-					case "yubikey":
-						// Don't need to check args, since this isn't passed anything
-						handleCommand(
-							auth.MountYubikey(),
-							"charlie mount yubikey",
-							"Connect yubikey to WSL instance",
-							nil,
-						)
-				}
-			case "new":
-				switch os.Args[2] {
-					case "commit":
-						// Don't need to check args, since this isn't passed anything
-						handleCommand(
-							githelpers.NewCommit(),
-							"charlie new commit",
-							"create new commit from all changes in the work tree",
-							nil,
-						)
-					case "cluster":
-						usage := "charlie new cluster [SIZE] [FLAGS]"
-						description := "Create a new GKE cluster with the given SIZE of nodes. Defaults to creating cluster with name from MY_CLUSTER env var"
-						shouldHaveArgs(3, usage, description, gcloud_fs)
-						handleCommand(
-							gcloud.NewCluster(*cluster_name, os.Args[3]),
-							usage,
-							description,
-							gcloud_fs,
-						)
-				}
-			case "publish":
-				switch os.Args[2] {
-					case "container":
-						usage := "charlie publish container [CONTAINER NAME] [NEW TAG] [FLAGS]"
-						description := "publish the container that was last built locally to a container registry.\nDefaults to using DEFAULT_CONTAINER_REGISTRY env var"
-						shouldHaveArgs(4, usage, description, con_fs)
-						handleCommand(
-							container.PublishContainer(os.Args[3], os.Args[4], *container_registry),
-							usage,
-							description,
-							con_fs,
-						)
-				}
-			case "read":
-				switch os.Args[2] {
-					case "kotsip":
-						usage := "charlie read kotsip"
-						description := "Read the ip that KOTS_IP should be set to"
-						// Don't need to check args, since this isn't passed anything
-						handleCommand(
-							cygnus.ReadKOTSIP(),
-							usage,
-							description,
-							nil,
-						)
-				}
-			case "remove":
-				switch os.Args[2] {
-					case "cluster":
-						usage := "charlie remove cluster [FLAGS]"
-						description := "Remove GKE cluster. Defaults to removing cluster with name from MY_CLUSTER env var"
-						shouldHaveArgs(2, usage, description, gcloud_fs)
-						handleCommand(
-							gcloud.RemoveCluster(*cluster_name),
-							usage,
-							description,
-							gcloud_fs,
-						)
-				}
-			case "repair":
-				switch os.Args[2] {
-					case "yubikey":
-						// Don't need to check args, since this isn't passed anything
-						handleCommand(
-							auth.RepairYubikey(),
-							"charlie repair yubikey",
-							"attempt to repair yubikey connection to WSL instance",
-							nil,
-						)
-				}
-			case "resize":
-				switch os.Args[2] {
-					case "cluster":
-						usage := "charlie resize cluster [SIZE] [FLAGS]"
-						description := "resize GKE cluster to given SIZE. Defaults to resizing cluster with name from MY_CLUSTER env var"
-						shouldHaveArgs(3, usage, description, gcloud_fs)
-						handleCommand(
-							gcloud.ResizeCluster(*cluster_name, os.Args[3]),
-							usage,
-							description,
-							gcloud_fs,
-						)
-				}
-			case "set":
-				switch os.Args[2] {
-					case "branch":
-						pull_branch := git_fs.Bool("pull", false, "pull from upstream")
-						usage := "charlie set branch [BRANCH NAME] [FLAGS]"
-						description := "set git repo to new branch"
-						shouldHaveArgs(3, usage, description, git_fs)
-						handleCommand(
-							githelpers.SetBranch(os.Args[3], *clear_branch, *pull_branch),
-							usage,
-							description,
-							git_fs,
-						)
-				}
-			case "start":
-				switch os.Args[2] {
-					case "docker":
-						// Don't need to check args, since this isn't passed anything
-						handleCommand(
-							container.StartDocker(),
-							"charlie start docker",
-							"start the docker service on localhost",
-							nil,
-						)
-				}
-			case "uninstall":
-				switch os.Args[2] {
-					case "cygnus":
-						usage := "charlie uninstall cygnus [FLAGS]"
-						description := "Run destroy-application to tear down an existing cygnus instance"
-						shouldHaveArgs(2, usage, description, cygnus_fs)
-						handleCommand(
-							cygnus.UninstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
-							usage,
-							description,
-							cygnus_fs,
-						)
-				}
+		for _, command := range command_list {
+			if os.Args[1] == command.Verb && os.Args[2] == command.Noun {
+				command.ExecutionFn()
+			}
 		}
 	}
 	fmt.Printf("Unknown command.\n\nUsage:\n  charlie [COMMAND] [OBJECT] [ARGUMENTS] [FLAGS]\n\n")
 	fmt.Printf("Available commands:\n")
-	for verb, nouns := range command_list {
-		for _, noun := range nouns {
-			fmt.Printf("    %s %s\n", verb, noun)
-		}
+	for _, command := range command_list {
+		fmt.Printf("    %s %s\n", command.Verb, command.Noun)
 	}
 	os.Exit(1)
 }
