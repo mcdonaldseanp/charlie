@@ -3,6 +3,7 @@ package utils
 import (
 	"regexp"
 	"fmt"
+	"path/filepath"
 	. "github.com/McdonaldSeanp/charlie/airer"
 )
 
@@ -11,6 +12,8 @@ type ValidateType int
 const (
 	NotEmpty ValidateType = iota
 	IsNumber
+	IsFile
+	IsIP
 )
 
 type Validator struct {
@@ -32,11 +35,36 @@ func ValidateParams(params []Validator) (*Airer) {
 						}
 					}
 				case IsNumber:
-					matcher, _ := regexp.Compile(`\d+`)
+					matcher, _ := regexp.Compile(`^[\d]+$`)
 					if !matcher.Match([]byte(data.Value)) {
 						return &Airer{
 							InvalidInput,
 							fmt.Sprintf("Parameter '%s' is not a number, given %s", data.Name, data.Value),
+							nil,
+						}
+					}
+				case IsIP:
+					matcher, _ := regexp.Compile(`^[\d\.]+$`)
+					if !matcher.Match([]byte(data.Value)) {
+						return &Airer{
+							InvalidInput,
+							fmt.Sprintf("Parameter '%s' is not a number, given %s", data.Name, data.Value),
+							nil,
+						}
+					}
+				case IsFile:
+					files, err := filepath.Glob(data.Value)
+					if err != nil {
+						return &Airer{
+							InvalidInput,
+							fmt.Sprintf("Failed attempting to check if '%s' is a file or directory, failure:\n%s", data.Name, err),
+							nil,
+						}
+					}
+					if len(files) < 1 {
+						return &Airer{
+							InvalidInput,
+							fmt.Sprintf("Parameter '%s' is not a file or directory, given %s", data.Name, data.Value),
 							nil,
 						}
 					}

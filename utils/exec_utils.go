@@ -8,9 +8,13 @@ import (
 	. "github.com/McdonaldSeanp/charlie/airer"
 )
 
+// ExecAsShell always writes everything to stderr so that
+// any resulting functionality can return something useful
+// to the CLI
 func ExecAsShell(command_string string, params ...string) (*Airer) {
 	shell_command := exec.Command(command_string, params...)
-	shell_command.Stdout = os.Stdout
+	shell_command.Env = os.Environ()
+	shell_command.Stdout = os.Stderr
 	shell_command.Stderr = os.Stderr
 	shell_command.Stdin = os.Stdin
 	err := shell_command.Run()
@@ -26,6 +30,7 @@ func ExecAsShell(command_string string, params ...string) (*Airer) {
 
 func ExecReadOutput(command_string string, params ...string) (string, *Airer) {
 	shell_command := exec.Command(command_string, params...)
+	shell_command.Env = os.Environ()
 	var stdout, stderr bytes.Buffer
 	shell_command.Stdout = &stdout
 	shell_command.Stderr = &stderr
@@ -43,6 +48,7 @@ func ExecReadOutput(command_string string, params ...string) (string, *Airer) {
 
 func ExecDetached(command_string string, params ...string) (*exec.Cmd, *Airer) {
 	shell_command := exec.Command(command_string, params...)
+	shell_command.Env = os.Environ()
 	err := shell_command.Start()
 	if err != nil {
 		return nil, &Airer{

@@ -76,13 +76,27 @@ func main() {
 																 os.Getenv("DEFAULT_CONTAINER_REGISTRY"),
 																 "set the container registry")
 
+  cygnus_fs := flag.NewFlagSet("cygnus", flag.ExitOnError)
+	cy_cluster_name := cygnus_fs.String("cluster-name",
+													  os.Getenv("MY_CLUSTER"),
+														"Execute against a specific cluster")
+	build_repo_loc := cygnus_fs.String("build-repo",
+									os.Getenv("CYGNUS_BUILD_REPO_DIR"),
+									"Location on disk of the repo where cygnus builds from")
+	pull_latest := cygnus_fs.Bool("pull-latest",
+									false,
+									"Updates the build repo to HEAD of the main branch from upstream when set")
+
+
   // Used in unknown command usage at the bottom. Set here so that
 	// you don't forget to add it.
 	command_list := map[string][]string{
 		"connect": {"pod", "cypod"},
+		"deploy": {"cygnus"},
 		"disconnect": {"pod", "cypod"},
 		"get": {"pr"},
 		"initialize": {"gcloud"},
+		"install": {"cygnus"},
 		"mount": {"yubikey"},
 		"new": {"commit", "cluster"},
 		"publish": {"container"},
@@ -91,6 +105,7 @@ func main() {
 		"resize": {"cluster"},
 		"set": {"branch"},
 		"start": {"docker"},
+		"uninstall": {"cygnus"},
 	}
 
 	// All CLI commands should follow naming rules of powershell approved verbs:
@@ -120,6 +135,19 @@ func main() {
 							usage,
 							description,
 							nil,
+						)
+				}
+			case "deploy":
+				switch os.Args[2] {
+					case "cygnus":
+						usage := "charlie deploy cygnus [FLAGS]"
+						description := "Deploy local changes of Cygnus to GKE"
+						shouldHaveArgs(2, usage, description, cygnus_fs)
+						handleCommand(
+							cygnus.DeployCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
+							usage,
+							description,
+							cygnus_fs,
 						)
 				}
 			case "disconnect":
@@ -169,6 +197,19 @@ func main() {
 							nil,
 						)
 				}
+			case "install":
+				switch os.Args[2] {
+					case "cygnus":
+						usage := "charlie install cygnus [FLAGS]"
+						description := "Deploy a new instance of Cygnus to GKE"
+						shouldHaveArgs(2, usage, description, cygnus_fs)
+						handleCommand(
+							cygnus.InstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
+							usage,
+							description,
+							cygnus_fs,
+						)
+				}
 			case "mount":
 				switch os.Args[2] {
 					case "yubikey":
@@ -212,6 +253,19 @@ func main() {
 							usage,
 							description,
 							con_fs,
+						)
+				}
+			case "read":
+				switch os.Args[2] {
+					case "kotsip":
+						usage := "charlie read kotsip"
+						description := "Read the ip that KOTS_IP should be set to"
+						// Don't need to check args, since this isn't passed anything
+						handleCommand(
+							cygnus.ReadKOTSIP(),
+							usage,
+							description,
+							nil,
 						)
 				}
 			case "remove":
@@ -274,6 +328,19 @@ func main() {
 							"charlie start docker",
 							"start the docker service on localhost",
 							nil,
+						)
+				}
+			case "uninstall":
+				switch os.Args[2] {
+					case "cygnus":
+						usage := "charlie uninstall cygnus [FLAGS]"
+						description := "Run destroy-application to tear down an existing cygnus instance"
+						shouldHaveArgs(2, usage, description, cygnus_fs)
+						handleCommand(
+							cygnus.UninstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
+							usage,
+							description,
+							cygnus_fs,
 						)
 				}
 		}

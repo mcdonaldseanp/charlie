@@ -42,7 +42,6 @@ func MountYubikey() (*Airer) {
 	airr = ExecAsShell("usbipd.exe", "wsl", "attach", "--busid", bus_id)
 	if airr != nil { return airr }
 	airr = ExecAsShell("sudo", "service", "pcscd", "restart")
-	if airr != nil { return airr }
 	return nil
 }
 
