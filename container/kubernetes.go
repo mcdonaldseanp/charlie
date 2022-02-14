@@ -15,6 +15,9 @@ func ConnectPod(podname string, port string) (*Airer) {
 		})
 	if airr != nil { return airr }
 	// BE WARY OF INFINITE LOOPS DUE TO MATCHING NAMES
+	//
+	// If any case names in this switch match the podname param
+	// passed to the recursive call this will loop infinitely
 	switch podname {
 		case "director":
 			return ConnectPod("pe-orchestration-services-0", "8143")

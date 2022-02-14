@@ -67,9 +67,12 @@ func main() {
 	// the flag package can ignore any required commands
 	// before parsing
 
-	// Git shared flags
-	git_fs := flag.NewFlagSet("git", flag.ExitOnError)
-	clear_branch := git_fs.Bool("clear", false, "delete any changes in work tree")
+	// Git branch shared flags
+	git_branch_fs := flag.NewFlagSet("git_branch", flag.ExitOnError)
+	clear_branch := git_branch_fs.Bool("clear", false, "delete any changes in work tree")
+
+	// Git commit shared flags
+	git_commit_fs := flag.NewFlagSet("git_commit", flag.ExitOnError)
 
 	// Gcloud shared flags
 	gcloud_fs := flag.NewFlagSet("gcloud", flag.ExitOnError)
@@ -100,6 +103,20 @@ func main() {
 	//
 	// Also, try to keep these in alphabetical order. The list is already long enough
 	command_list := []CLICommand{
+		{ "add", "commit",
+			func() {
+				usage := "charlie new commit [FLAGS]"
+				description := "Add all changes in the work tree to previous commit"
+				no_edit := git_commit_fs.Bool("no-edit", false, "Commit all changes without changing commit message")
+				shouldHaveArgs(2, usage, description, git_commit_fs)
+				handleCommand(
+					githelpers.AddCommit(*no_edit),
+					usage,
+					description,
+					git_branch_fs,
+				)
+			},
+		},
 		{ "connect", "pod",
 			func() {
 				usage := "charlie connect pod [POD NAME] [PORT]"
@@ -149,12 +166,12 @@ func main() {
 			func() {
 				usage := "charlie get pr [PR NUMBER] [FLAGS]"
 				description := "Check out contents of a PR from github"
-				shouldHaveArgs(3, usage, description, git_fs)
+				shouldHaveArgs(3, usage, description, git_branch_fs)
 				handleCommand(
 					githelpers.GetPR(os.Args[3], *clear_branch),
 					usage,
 					description,
-					git_fs,
+					git_branch_fs,
 				)
 			},
 		},
@@ -282,15 +299,15 @@ func main() {
 		},
 		{ "set", "branch",
 			func() {
-				pull_branch := git_fs.Bool("pull", false, "pull from upstream")
+				pull_branch := git_branch_fs.Bool("pull", false, "pull from upstream")
 				usage := "charlie set branch [BRANCH NAME] [FLAGS]"
 				description := "set git repo to new branch"
-				shouldHaveArgs(3, usage, description, git_fs)
+				shouldHaveArgs(3, usage, description, git_branch_fs)
 				handleCommand(
 					githelpers.SetBranch(os.Args[3], *clear_branch, *pull_branch),
 					usage,
 					description,
-					git_fs,
+					git_branch_fs,
 				)
 			},
 		},

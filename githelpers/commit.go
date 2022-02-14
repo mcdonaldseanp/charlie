@@ -10,9 +10,19 @@ func NewCommit() (*Airer) {
 	airr := addAllToWorkTree()
 	if airr != nil { return airr }
 	// Use the shell 'git commit' so that it will open vi to edit the message
-	airr = ExecAsShell("git", "commit")
+	return ExecAsShell("git", "commit")
+}
+
+func AddCommit(no_edit bool) (*Airer) {
+	airr := addAllToWorkTree()
 	if airr != nil { return airr }
-	return nil
+	// Use the shell 'git commit' so that it will open vi to edit the message
+	if no_edit {
+		// This technically doesn't need to use asShell, but whatever
+		return ExecAsShell("git", "commit", "--amend", "--no-edit")
+	} else {
+		return ExecAsShell("git", "commit", "--amend")
+	}
 }
 
 func addAllToWorkTree() (*Airer) {
