@@ -23,18 +23,18 @@ func shouldHaveArgs(num_args int, usage string, description string, flagset *fla
 	passed_fs := flagset != nil
 	for _, arg := range os.Args {
 		if arg == "-h" {
-			fmt.Printf("Usage:\n  %s\n\nDescription:\n  %s\n\n", usage, description)
+			fmt.Fprintf(os.Stderr, "Usage:\n  %s\n\nDescription:\n  %s\n\n", usage, description)
 			if passed_fs {
-				fmt.Printf("Available flags:\n")
+				fmt.Fprintf(os.Stderr, "Available flags:\n")
 				flagset.PrintDefaults()
 			}
 			os.Exit(0)
 		}
 	}
 	if len(os.Args) < real_args {
-		fmt.Printf("Invalid input, not enough arguments.\n\nUsage:\n  %s\n\nDescription:\n  %s\n\n", usage, description)
+		fmt.Fprintf(os.Stderr, "AIRER running command:\n\nInvalid input, not enough arguments.\n\nUsage:\n  %s\n\nDescription:\n  %s\n\n", usage, description)
 		if passed_fs {
-			fmt.Printf("Available flags:\n")
+			fmt.Fprintf(os.Stderr, "Available flags:\n")
 			flagset.PrintDefaults()
 		}
 		os.Exit(1)
@@ -43,15 +43,15 @@ func shouldHaveArgs(num_args int, usage string, description string, flagset *fla
 	}
 }
 
-func handleCommand(airr *Airer, usage string, description string, flagset *flag.FlagSet) {
+func handleCommandAirer(airr *Airer, usage string, description string, flagset *flag.FlagSet) {
 	if airr != nil {
 		if airr.Kind == InvalidInput {
-			fmt.Printf("%s\nUsage:\n  %s\n\nDescription:\n  %s\n\n", airr, usage, description)
+			fmt.Fprintf(os.Stderr, "%s\nUsage:\n  %s\n\nDescription:\n  %s\n\n", airr, usage, description)
 			if flagset != nil {
 				flagset.PrintDefaults()
 			}
 		} else {
-			fmt.Printf("Failed to run command:\n\n%s\n", airr)
+			fmt.Fprintf(os.Stderr, "AIRER running command:\n\n%s\n", airr)
 		}
 		os.Exit(1)
 	}
@@ -109,7 +109,7 @@ func main() {
 				description := "Add all changes in the work tree to previous commit"
 				no_edit := git_commit_fs.Bool("no-edit", false, "Commit all changes without changing commit message")
 				shouldHaveArgs(2, usage, description, git_commit_fs)
-				handleCommand(
+				handleCommandAirer(
 					githelpers.AddCommit(*no_edit),
 					usage,
 					description,
@@ -128,7 +128,7 @@ func main() {
 				if len(os.Args) >= 5 {
 					port_num = os.Args[4]
 				}
-				handleCommand(
+				handleCommandAirer(
 					container.ConnectPod(os.Args[3], port_num),
 					usage,
 					description,
@@ -141,7 +141,7 @@ func main() {
 				usage := "charlie deploy cygnus [FLAGS]"
 				description := "Deploy local changes of Cygnus to GKE"
 				shouldHaveArgs(2, usage, description, cygnus_fs)
-				handleCommand(
+				handleCommandAirer(
 					cygnus.DeployCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
 					usage,
 					description,
@@ -154,7 +154,7 @@ func main() {
 				usage := "charlie disconnect pod [POD NAME]"
 				description := "stop port fowarding from a k8s pod"
 				shouldHaveArgs(3, usage, description, nil)
-				handleCommand(
+				handleCommandAirer(
 					container.DisconnectPod(os.Args[3]),
 					usage,
 					description,
@@ -167,7 +167,7 @@ func main() {
 				usage := "charlie get pr [PR NUMBER] [FLAGS]"
 				description := "Check out contents of a PR from github"
 				shouldHaveArgs(3, usage, description, git_branch_fs)
-				handleCommand(
+				handleCommandAirer(
 					githelpers.GetPR(os.Args[3], *clear_branch),
 					usage,
 					description,
@@ -177,11 +177,13 @@ func main() {
 		},
 		{ "initialize", "gcloud",
 			func() {
-				// Don't need to check args, since this isn't passed anything
-				handleCommand(
+				usage := "charlie initialize gcloud"
+				description := "initialize and authorize gcloud CLI"
+				shouldHaveArgs(2, usage, description, nil)
+				handleCommandAirer(
 					gcloud.InitializeGcloud(),
-					"charlie initialize gcloud",
-					"initialize and authorize gcloud CLI",
+					usage,
+					description,
 					nil,
 				)
 			},
@@ -191,7 +193,7 @@ func main() {
 				usage := "charlie install cygnus [FLAGS]"
 				description := "Deploy a new instance of Cygnus to GKE"
 				shouldHaveArgs(2, usage, description, cygnus_fs)
-				handleCommand(
+				handleCommandAirer(
 					cygnus.InstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
 					usage,
 					description,
@@ -201,22 +203,26 @@ func main() {
 		},
 		{ "mount", "yubikey",
 			func() {
-				// Don't need to check args, since this isn't passed anything
-				handleCommand(
+				usage := "charlie mount yubikey"
+				description := "Connect yubikey to WSL instance"
+				shouldHaveArgs(2, usage, description, nil)
+				handleCommandAirer(
 					auth.MountYubikey(),
-					"charlie mount yubikey",
-					"Connect yubikey to WSL instance",
+					usage,
+					description,
 					nil,
 				)
 			},
 		},
 		{ "new", "commit",
 			func() {
-				// Don't need to check args, since this isn't passed anything
-				handleCommand(
+				usage := "charlie new commit"
+				description := "create new commit from all changes in the work tree"
+				shouldHaveArgs(2, usage, description, nil)
+				handleCommandAirer(
 					githelpers.NewCommit(),
-					"charlie new commit",
-					"create new commit from all changes in the work tree",
+					usage,
+					description,
 					nil,
 				)
 			},
@@ -226,7 +232,7 @@ func main() {
 				usage := "charlie new cluster [SIZE] [FLAGS]"
 				description := "Create a new GKE cluster with the given SIZE of nodes. Defaults to creating\n cluster with name from MY_CLUSTER env var"
 				shouldHaveArgs(3, usage, description, gcloud_fs)
-				handleCommand(
+				handleCommandAirer(
 					gcloud.NewCluster(*cluster_name, os.Args[3]),
 					usage,
 					description,
@@ -239,7 +245,7 @@ func main() {
 				usage := "charlie publish container [CONTAINER NAME] [NEW TAG] [FLAGS]"
 				description := "publish the container that was last built locally to a container registry.\nDefaults to using DEFAULT_CONTAINER_REGISTRY env var"
 				shouldHaveArgs(4, usage, description, con_fs)
-				handleCommand(
+				handleCommandAirer(
 					container.PublishContainer(os.Args[3], os.Args[4], *container_registry),
 					usage,
 					description,
@@ -251,9 +257,13 @@ func main() {
 			func() {
 				usage := "charlie read kotsip"
 				description := "Read the ip that KOTS_IP should be set to"
-				// Don't need to check args, since this isn't passed anything
-				handleCommand(
-					cygnus.ReadKOTSIP(),
+				shouldHaveArgs(2, usage, description, nil)
+				output, airr := cygnus.ReadKOTSIP()
+				if airr == nil {
+					fmt.Printf("%s", output)
+				}
+				handleCommandAirer(
+					airr,
 					usage,
 					description,
 					nil,
@@ -265,7 +275,7 @@ func main() {
 				usage := "charlie remove cluster [FLAGS]"
 				description := "Remove GKE cluster. Defaults to removing cluster with name from MY_CLUSTER \nenv var"
 				shouldHaveArgs(2, usage, description, gcloud_fs)
-				handleCommand(
+				handleCommandAirer(
 					gcloud.RemoveCluster(*cluster_name),
 					usage,
 					description,
@@ -275,11 +285,13 @@ func main() {
 		},
 		{ "repair", "yubikey",
 			func() {
-				// Don't need to check args, since this isn't passed anything
-				handleCommand(
+				usage := "charlie repair yubikey"
+				description := "attempt to repair yubikey connection to WSL instance"
+				shouldHaveArgs(2, usage, description, nil)
+				handleCommandAirer(
 					auth.RepairYubikey(),
-					"charlie repair yubikey",
-					"attempt to repair yubikey connection to WSL instance",
+					usage,
+					description,
 					nil,
 				)
 			},
@@ -289,7 +301,7 @@ func main() {
 				usage := "charlie resize cluster [SIZE] [FLAGS]"
 				description := "resize GKE cluster to given SIZE. Defaults to resizing cluster with name \nfrom MY_CLUSTER env var"
 				shouldHaveArgs(3, usage, description, gcloud_fs)
-				handleCommand(
+				handleCommandAirer(
 					gcloud.ResizeCluster(*cluster_name, os.Args[3]),
 					usage,
 					description,
@@ -303,7 +315,7 @@ func main() {
 				usage := "charlie set branch [BRANCH NAME] [FLAGS]"
 				description := "set git repo to new branch"
 				shouldHaveArgs(3, usage, description, git_branch_fs)
-				handleCommand(
+				handleCommandAirer(
 					githelpers.SetBranch(os.Args[3], *clear_branch, *pull_branch),
 					usage,
 					description,
@@ -313,11 +325,13 @@ func main() {
 		},
 		{ "start", "docker",
 			func() {
-				// Don't need to check args, since this isn't passed anything
-				handleCommand(
+				usage := "charlie start docker"
+				description := "start the docker service on localhost"
+				shouldHaveArgs(2, usage, description, nil)
+				handleCommandAirer(
 					container.StartDocker(),
-					"charlie start docker",
-					"start the docker service on localhost",
+					usage,
+					description,
 					nil,
 				)
 			},
@@ -327,7 +341,7 @@ func main() {
 				usage := "charlie uninstall cygnus [FLAGS]"
 				description := "Run destroy-application to tear down an existing cygnus instance"
 				shouldHaveArgs(2, usage, description, cygnus_fs)
-				handleCommand(
+				handleCommandAirer(
 					cygnus.UninstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
 					usage,
 					description,

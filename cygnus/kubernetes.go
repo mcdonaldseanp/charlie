@@ -10,6 +10,8 @@ import (
 	. "github.com/McdonaldSeanp/charlie/airer"
 )
 
+var MAX_KOTS_IP_READS = 100
+
 func InstallCygnus(cluster_name string, build_repo_loc string, pull_latest bool) (*Airer) {
 	original_dir, err := os.Getwd()
 	if err != nil {
@@ -27,7 +29,9 @@ func InstallCygnus(cluster_name string, build_repo_loc string, pull_latest bool)
 	// on initial installation it won't exist and we need to run
 	// start-ingress-controller before fetching the IP but _after_
 	// the rest of the buildContext helper functionality
-	err = os.Setenv("KOTS_IP", fetchKOTSIP())
+	kots_ip, airr := ReadKOTSIP()
+	if airr != nil { return airr }
+	err = os.Setenv("KOTS_IP", kots_ip)
 	if err != nil {
 		return &Airer{
 			ExecError,
@@ -82,7 +86,9 @@ func cygnusBuildContext(cluster_name string, build_repo_loc string, pull_latest 
 	// Set MY_CLUSTER and KOTS_IP
 	os.Setenv("MY_CLUSTER", cluster_name)
 	if fetch_kots_ip {
-		err := os.Setenv("KOTS_IP", fetchKOTSIP())
+		kots_ip, airr := ReadKOTSIP()
+		if airr != nil { return airr }
+		err := os.Setenv("KOTS_IP", kots_ip)
 		if err != nil {
 			return &Airer{
 				ExecError,
@@ -102,10 +108,11 @@ func cygnusBuildContext(cluster_name string, build_repo_loc string, pull_latest 
 	return nil
 }
 
-func fetchKOTSIP() string {
+func ReadKOTSIP() (string, *Airer) {
 	fmt.Fprintf(os.Stderr, "Reading KOTS_IP.")
-	for {
-		output, _ := ExecReadOutput(
+	output := ""
+	for i := 0; i < MAX_KOTS_IP_READS; i++ {
+		output, _ = ExecReadOutput(
 			"kubectl",
 			"-n",
 			"ingress-nginx",
@@ -123,14 +130,16 @@ func fetchKOTSIP() string {
 			})
 		if airr == nil {
 			fmt.Fprintf(os.Stderr, "\n")
-			return output
+			return output, nil
 		}
 		fmt.Fprintf(os.Stderr, ".")
 		time.Sleep(2 * time.Second)
 	}
-}
-
-func ReadKOTSIP() (*Airer) {
-	fmt.Printf("%s", fetchKOTSIP())
-	return nil
+	// If we reach this, we've tried to read MAX_KOTS_IP_READS times
+	// and not succeeded, so fail
+	return "", &Airer{
+		ExecError,
+		fmt.Sprintf("Failed to read KOTS_IP from kubernetes. Last output: %s", output),
+		nil,
+	}
 }
