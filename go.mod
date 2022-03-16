@@ -1,4 +1,4 @@
-module github.com/McdonaldSeanp/charlie
+module github.com/McdonaldSeanp/kelly
 
 go 1.16
 

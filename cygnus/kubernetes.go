@@ -5,9 +5,9 @@ import (
 	"os"
 	"time"
 	"strings"
-	"github.com/McdonaldSeanp/charlie/githelpers"
-	. "github.com/McdonaldSeanp/charlie/utils"
-	. "github.com/McdonaldSeanp/charlie/airer"
+	"github.com/McdonaldSeanp/kelly/githelpers"
+	. "github.com/McdonaldSeanp/kelly/utils"
+	. "github.com/McdonaldSeanp/kelly/airer"
 )
 
 var MAX_KOTS_IP_READS = 100

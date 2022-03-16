@@ -1,8 +1,8 @@
 package container
 
 import (
-	. "github.com/McdonaldSeanp/charlie/utils"
-	. "github.com/McdonaldSeanp/charlie/airer"
+	. "github.com/McdonaldSeanp/kelly/utils"
+	. "github.com/McdonaldSeanp/kelly/airer"
 )
 
 func StartDocker() (*Airer) {

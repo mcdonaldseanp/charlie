@@ -4,7 +4,7 @@ import (
 	"testing"
 	"strings"
 	"os"
-	. "github.com/McdonaldSeanp/charlie/utils"
+	. "github.com/McdonaldSeanp/kelly/utils"
 )
 
 func initRepo(t *testing.T) {
@@ -62,7 +62,7 @@ func fakeFile(dir string, t *testing.T) {
 // Test that checking out the already checked out branch does nothing
 func TestBranchSame(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "charlie_testing")
+	testdir, _ := os.MkdirTemp("", "kelly_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
@@ -82,7 +82,7 @@ func TestBranchSame(t *testing.T) {
 // but does not change the current branch
 func TestBranchNoExist(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "charlie_testing")
+	testdir, _ := os.MkdirTemp("", "kelly_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
@@ -112,7 +112,7 @@ func TestBranchNoExist(t *testing.T) {
 // Test that checking out a separate branch works
 func TestBranchDifferent(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "charlie_testing")
+	testdir, _ := os.MkdirTemp("", "kelly_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
@@ -142,7 +142,7 @@ func TestBranchDifferent(t *testing.T) {
 // Test that checking out a separate branch when the worktree is dirty fails
 func TestBranchDirty(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "charlie_testing")
+	testdir, _ := os.MkdirTemp("", "kelly_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
@@ -174,7 +174,7 @@ func TestBranchDirty(t *testing.T) {
 // Test that checking out with --clear set will clean the branch and switch
 func TestBranchClear(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "charlie_testing")
+	testdir, _ := os.MkdirTemp("", "kelly_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
