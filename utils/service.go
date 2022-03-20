@@ -2,7 +2,8 @@ package utils
 
 import (
 	"os/exec"
-	. "github.com/McdonaldSeanp/kelly/airer"
+	. "github.com/mcdonaldseanp/charlie/utils"
+	. "github.com/mcdonaldseanp/charlie/airer"
 )
 
 func StartService(service_name string) (*Airer) {

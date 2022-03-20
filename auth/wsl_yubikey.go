@@ -3,8 +3,9 @@ package auth
 import (
 	"fmt"
 	"strings"
-	. "github.com/McdonaldSeanp/kelly/utils"
-	. "github.com/McdonaldSeanp/kelly/airer"
+	. "github.com/mcdonaldseanp/kelly/utils"
+	. "github.com/mcdonaldseanp/charlie/utils"
+	. "github.com/mcdonaldseanp/charlie/airer"
 )
 
 func findYubikeyBUSID() (string, *Airer) {

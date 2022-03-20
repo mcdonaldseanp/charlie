@@ -4,7 +4,8 @@ import (
 	"testing"
 	"strings"
 	"os"
-	. "github.com/McdonaldSeanp/kelly/utils"
+	. "github.com/mcdonaldseanp/kelly/utils"
+	. "github.com/mcdonaldseanp/charlie/utils"
 )
 
 func initRepo(t *testing.T) {

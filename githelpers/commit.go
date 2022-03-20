@@ -2,8 +2,9 @@ package githelpers
 
 import (
 	"fmt"
-	. "github.com/McdonaldSeanp/kelly/airer"
-	. "github.com/McdonaldSeanp/kelly/utils"
+	. "github.com/mcdonaldseanp/charlie/airer"
+	. "github.com/mcdonaldseanp/charlie/utils"
+	. "github.com/mcdonaldseanp/kelly/utils"
 )
 
 func NewCommit() (*Airer) {

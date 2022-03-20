@@ -1,8 +1,8 @@
 package gcloud
 
 import (
-	. "github.com/McdonaldSeanp/kelly/utils"
-	. "github.com/McdonaldSeanp/kelly/airer"
+	. "github.com/mcdonaldseanp/charlie/utils"
+	. "github.com/mcdonaldseanp/charlie/airer"
 )
 
 func InitializeGcloud() (*Airer) {

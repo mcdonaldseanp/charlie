@@ -4,9 +4,10 @@ import (
 	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/McdonaldSeanp/kelly/auth"
-	. "github.com/McdonaldSeanp/kelly/utils"
-  . "github.com/McdonaldSeanp/kelly/airer"
+	"github.com/mcdonaldseanp/kelly/auth"
+	. "github.com/mcdonaldseanp/kelly/utils"
+	. "github.com/mcdonaldseanp/charlie/utils"
+  . "github.com/mcdonaldseanp/charlie/airer"
 )
 
 func SetBranch(branch_name string, clear bool, pull bool) (*Airer) {

@@ -4,8 +4,8 @@ import (
 	"strconv"
 	"os"
 	"fmt"
-	. "github.com/McdonaldSeanp/kelly/utils"
-	. "github.com/McdonaldSeanp/kelly/airer"
+	. "github.com/mcdonaldseanp/charlie/utils"
+	. "github.com/mcdonaldseanp/charlie/airer"
 )
 
 func ConnectPod(podname string, port string) (*Airer) {

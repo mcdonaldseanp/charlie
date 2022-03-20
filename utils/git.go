@@ -7,7 +7,7 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
 	"github.com/go-git/go-billy/v5/osfs"
-	. "github.com/McdonaldSeanp/kelly/airer"
+	. "github.com/mcdonaldseanp/charlie/airer"
 )
 
 func OpenRepo() (*git.Repository, *Airer) {
