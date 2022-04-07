@@ -5,7 +5,7 @@ import (
 	"os"
 	"time"
 	"strings"
-	"github.com/mcdonaldseanp/kelly/githelpers"
+	"github.com/mcdonaldseanp/charlie/githelpers"
 	. "github.com/mcdonaldseanp/charlie/utils"
 	. "github.com/mcdonaldseanp/charlie/airer"
 )
@@ -112,7 +112,7 @@ func ReadKOTSIP() (string, *Airer) {
 	fmt.Fprintf(os.Stderr, "Reading KOTS_IP.")
 	output := ""
 	for i := 0; i < MAX_KOTS_IP_READS; i++ {
-		output, _ = ExecReadOutput(
+		output, _, _ = ExecReadOutput(
 			"kubectl",
 			"-n",
 			"ingress-nginx",

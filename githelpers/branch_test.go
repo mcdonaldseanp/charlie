@@ -4,12 +4,11 @@ import (
 	"testing"
 	"strings"
 	"os"
-	. "github.com/mcdonaldseanp/kelly/utils"
 	. "github.com/mcdonaldseanp/charlie/utils"
 )
 
 func initRepo(t *testing.T) {
-	_, airr := ExecReadOutput("git", "init")
+	_, _, airr := ExecReadOutput("git", "init")
 	if airr != nil {
 		t.Fatalf("Failed to create test repo: %s\n", airr)
 	}
@@ -18,22 +17,22 @@ func initRepo(t *testing.T) {
 		t.Fatalf("Failed to create test repo: %s\n", err)
 	}
 	f.Close()
-	_, airr = ExecReadOutput("git", "add", "--all")
+	_, _, airr = ExecReadOutput("git", "add", "--all")
 	if airr != nil {
 		t.Fatalf("Failed to create test repo: %s\n", airr)
 	}
-	_, airr = ExecReadOutput("git", "commit", "-m", "initial", "--no-gpg-sign")
+	_, _, airr = ExecReadOutput("git", "commit", "-m", "initial", "--no-gpg-sign")
 	if airr != nil {
 		t.Fatalf("Failed to create test repo: %s\n", airr)
 	}
-	_, airr = ExecReadOutput("git", "checkout", "-B", "main")
+	_, _, airr = ExecReadOutput("git", "checkout", "-B", "main")
 	if airr != nil {
 		t.Fatalf("Failed to create test repo: %s\n", airr)
 	}
 }
 
 func getBranch(t *testing.T) string {
-	result, airr := ExecReadOutput("git", "rev-parse", "--abbrev-ref", "HEAD")
+	result, _, airr := ExecReadOutput("git", "rev-parse", "--abbrev-ref", "HEAD")
 	if airr != nil {
 		t.Fatalf("Failed to read branch: %s\n", airr)
 	}
@@ -42,11 +41,11 @@ func getBranch(t *testing.T) string {
 
 func fakeCommit(dir string, t *testing.T) {
 	fakeFile(dir, t)
-	_, airr := ExecReadOutput("git", "add", "--all")
+	_, _, airr := ExecReadOutput("git", "add", "--all")
 	if airr != nil {
 		t.Fatalf("Failed to create new commit: %s\n", airr)
 	}
-	_, airr = ExecReadOutput("git", "commit", "-m", "fake", "--no-gpg-sign")
+	_, _, airr = ExecReadOutput("git", "commit", "-m", "fake", "--no-gpg-sign")
 	if airr != nil {
 		t.Fatalf("Failed to create new commit: %s\n", airr)
 	}
@@ -63,7 +62,7 @@ func fakeFile(dir string, t *testing.T) {
 // Test that checking out the already checked out branch does nothing
 func TestBranchSame(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "kelly_testing")
+	testdir, _ := os.MkdirTemp("", "charlie_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
@@ -83,7 +82,7 @@ func TestBranchSame(t *testing.T) {
 // but does not change the current branch
 func TestBranchNoExist(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "kelly_testing")
+	testdir, _ := os.MkdirTemp("", "charlie_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
@@ -113,12 +112,12 @@ func TestBranchNoExist(t *testing.T) {
 // Test that checking out a separate branch works
 func TestBranchDifferent(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "kelly_testing")
+	testdir, _ := os.MkdirTemp("", "charlie_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, airr := ExecReadOutput("git", "checkout", "-B", "different")
+	_, _, airr := ExecReadOutput("git", "checkout", "-B", "different")
 	if airr != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", airr)
 	}
@@ -143,12 +142,12 @@ func TestBranchDifferent(t *testing.T) {
 // Test that checking out a separate branch when the worktree is dirty fails
 func TestBranchDirty(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "kelly_testing")
+	testdir, _ := os.MkdirTemp("", "charlie_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, airr := ExecReadOutput("git", "checkout", "-B", "different")
+	_, _, airr := ExecReadOutput("git", "checkout", "-B", "different")
 	if airr != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", airr)
 	}
@@ -175,12 +174,12 @@ func TestBranchDirty(t *testing.T) {
 // Test that checking out with --clear set will clean the branch and switch
 func TestBranchClear(t *testing.T) {
 	originaldir, _ := os.Getwd()
-	testdir, _ := os.MkdirTemp("", "kelly_testing")
+	testdir, _ := os.MkdirTemp("", "charlie_testing")
 	defer os.RemoveAll(testdir)
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, airr := ExecReadOutput("git", "checkout", "-B", "different")
+	_, _, airr := ExecReadOutput("git", "checkout", "-B", "different")
 	if airr != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", airr)
 	}

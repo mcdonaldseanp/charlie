@@ -1,7 +1,6 @@
 package container
 
 import (
-	. "github.com/mcdonaldseanp/kelly/utils"
 	. "github.com/mcdonaldseanp/charlie/utils"
 	. "github.com/mcdonaldseanp/charlie/airer"
 )
@@ -21,7 +20,7 @@ func PublishContainer(name string, tag string, registry_url string) (*Airer) {
 			Validator{ "registry_url", registry_url, []ValidateType{ NotEmpty } },
 		})
 	if airr != nil { return airr }
-	output, airr := ExecReadOutput("docker", "images", "-q")
+	output, _, airr := ExecReadOutput("docker", "images", "-q")
 	if airr != nil { return airr }
 	last_image := FirstLine(output)
 	full_tag := registry_url + "/" + name + ":" + tag

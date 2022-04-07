@@ -3,13 +3,12 @@ package auth
 import (
 	"fmt"
 	"strings"
-	. "github.com/mcdonaldseanp/kelly/utils"
 	. "github.com/mcdonaldseanp/charlie/utils"
 	. "github.com/mcdonaldseanp/charlie/airer"
 )
 
 func findYubikeyBUSID() (string, *Airer) {
-	output, airr := ExecReadOutput("usbipd.exe", "wsl", "list")
+	output, _, airr := ExecReadOutput("usbipd.exe", "wsl", "list")
 	if airr != nil { return "", airr }
 	substr := LineWithSubStr(output, "Smartcard Reader")
 	if substr == "" {
@@ -47,7 +46,7 @@ func MountYubikey() (*Airer) {
 }
 
 func TryFixAuth(attempt_command string, params ...string) (string, *Airer) {
-	output, airr := ExecReadOutput(attempt_command, params...)
+	output, _, airr := ExecReadOutput(attempt_command, params...)
 	if airr != nil {
 		airr = RepairYubikey()
 		if airr != nil {
@@ -58,7 +57,7 @@ func TryFixAuth(attempt_command string, params ...string) (string, *Airer) {
 			}
 		}
 		// Make another attempt
-		output, airr = ExecReadOutput(attempt_command, params...)
+		output, _, airr = ExecReadOutput(attempt_command, params...)
 		if airr != nil {
 			return "", &Airer{
 				ExecError,
@@ -85,7 +84,7 @@ func RepairYubikey() (*Airer) {
 		// If it was already connected, we can continue
 	}
 	// Also try to unfuck gpg
-	_, airr = ExecReadOutput("gpg-connect-agent", "updatestartuptty", "/bye")
+	_, _, airr = ExecReadOutput("gpg-connect-agent", "updatestartuptty", "/bye")
 	if airr != nil {
 		// Definately fucked
 		return &Airer{

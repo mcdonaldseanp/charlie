@@ -2,7 +2,6 @@ package utils
 
 import (
 	"os/exec"
-	. "github.com/mcdonaldseanp/charlie/utils"
 	. "github.com/mcdonaldseanp/charlie/airer"
 )
 

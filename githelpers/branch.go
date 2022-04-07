@@ -4,8 +4,7 @@ import (
 	"fmt"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
-	"github.com/mcdonaldseanp/kelly/auth"
-	. "github.com/mcdonaldseanp/kelly/utils"
+	"github.com/mcdonaldseanp/charlie/auth"
 	. "github.com/mcdonaldseanp/charlie/utils"
   . "github.com/mcdonaldseanp/charlie/airer"
 )
@@ -49,7 +48,7 @@ func SetBranch(branch_name string, clear bool, pull bool) (*Airer) {
 	return nil
 }
 
-func GetPR(pr_name string, clear bool) (*Airer) {
+func GetPR(pr_name string, clear bool, git_remote string) (*Airer) {
 	// Don't need to validate bool params, there will be a type error
 	// if anything other than bools are passed
 	airr := ValidateParams(
@@ -58,7 +57,7 @@ func GetPR(pr_name string, clear bool) (*Airer) {
 		})
 	if airr != nil { return airr }
 	new_branch_name := "PR" + pr_name
-	airr = ExecAsShell("git", "fetch", "upstream", "pull/" + pr_name + "/head:" + new_branch_name)
+	airr = ExecAsShell("git", "fetch", git_remote, "pull/" + pr_name + "/head:" + new_branch_name)
 	if airr != nil { return airr }
 	return SetBranch(new_branch_name, clear, false)
 }
