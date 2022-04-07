@@ -18,7 +18,7 @@ func (ar AirerType) String() string {
 	return []string{"Shell command failed:", "Execution failed:", "Already done:", "Invalid input:", "Remote execution failed:"}[ar]
 }
 
-// Your illiteracy has screwed us again, regulator!
+// Your illiteracy has screwed us again, charlie!
 //
 // Airer is a custom error type that provides a
 // Kind field for parsing different error types.
