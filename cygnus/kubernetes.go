@@ -9,7 +9,7 @@ import (
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/githelpers"
 	"github.com/mcdonaldseanp/charlie/localexec"
-	. "github.com/mcdonaldseanp/charlie/utils"
+	"github.com/mcdonaldseanp/charlie/validator"
 )
 
 var MAX_KOTS_IP_READS = 100
@@ -83,14 +83,18 @@ func DeployCygnus(cluster_name string, build_repo_loc string, pull_latest bool) 
 //      * cwd is the build repo location
 //      * if 'pull latest' is true, reset the git branch to HEAD of upstream's main branch
 func cygnusBuildContext(cluster_name string, build_repo_loc string, pull_latest bool, fetch_kots_ip bool) *airer.Airer {
-	airr := ValidateParams(
-		[]Validator{
-			Validator{"cluster_name", cluster_name, []ValidateType{NotEmpty}},
-			Validator{"build_repo_loc", build_repo_loc, []ValidateType{NotEmpty, IsFile}},
-		})
-	if airr != nil {
-		return airr
+	arr := validator.ValidateParams(fmt.Sprintf(
+		`[
+			{"name":"cluster_name","value":"%s","validate":["NotEmpty"]}
+			{"name":"build_repo_loc","value":"%s","validate":["NotEmpty", "IsFile"]}
+		 ]`,
+		cluster_name,
+		build_repo_loc,
+	))
+	if arr != nil {
+		return arr
 	}
+
 	// Set MY_CLUSTER and KOTS_IP
 	os.Setenv("MY_CLUSTER", cluster_name)
 	if fetch_kots_ip {
@@ -112,9 +116,9 @@ func cygnusBuildContext(cluster_name string, build_repo_loc string, pull_latest 
 	// was specified
 	os.Chdir(build_repo_loc)
 	if pull_latest {
-		airr = githelpers.SetBranch("main", true, true)
-		if airr != nil {
-			return airr
+		arr = githelpers.SetBranch("main", true, true)
+		if arr != nil {
+			return arr
 		}
 	}
 	return nil
@@ -136,11 +140,11 @@ func ReadKOTSIP() (string, *airer.Airer) {
 		)
 		// I could fix this if I cared about it :D
 		output = strings.Trim(output, "'")
-		airr := ValidateParams(
-			[]Validator{
-				Validator{"kots_ip", output, []ValidateType{NotEmpty, IsIP}},
-			})
-		if airr == nil {
+		arr := validator.ValidateParams(fmt.Sprintf(
+			`[{"name":"kots_ip","value":"%s","validate":["NotEmpty", IsIP]}]`,
+			output,
+		))
+		if arr != nil {
 			fmt.Fprintf(os.Stderr, "\n")
 			return output, nil
 		}

@@ -5,8 +5,8 @@ import (
 	"strings"
 
 	"github.com/mcdonaldseanp/charlie/airer"
+	"github.com/mcdonaldseanp/charlie/find"
 	"github.com/mcdonaldseanp/charlie/localexec"
-	"github.com/mcdonaldseanp/charlie/utils"
 	"github.com/mcdonaldseanp/charlie/winservice"
 )
 
@@ -15,11 +15,11 @@ func findYubikeyBUSID() (string, *airer.Airer) {
 	if airr != nil {
 		return "", airr
 	}
-	substr := utils.LineWithSubStr(output, "Smartcard Reader")
+	substr := find.LineWithSubStr(output, "Smartcard Reader")
 	if substr == "" {
 		return "", &airer.Airer{
 			Kind:    airer.ExecError,
-			Message: fmt.Sprintf("Unable to find Yubikey BUSID, cannot continue"),
+			Message: "Unable to find Yubikey BUSID, cannot continue",
 			Origin:  nil,
 		}
 	}
@@ -48,8 +48,7 @@ func MountYubikey() *airer.Airer {
 	if airr != nil {
 		return airr
 	}
-	airr = localexec.ExecAsShell("sudo", "service", "pcscd", "restart")
-	return nil
+	return localexec.ExecAsShell("sudo", "service", "pcscd", "restart")
 }
 
 func TryFixAuth(attempt_command string, params ...string) (string, *airer.Airer) {

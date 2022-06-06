@@ -38,12 +38,12 @@ func ChooseFileOrStdin(specfile string, use_stdin bool) (string, *airer.Airer) {
 		//
 		// Cheat a little with the validator: this function is mostly used
 		// for the CLI commands, so use a name that shows it's the flag
-		rgerr := validator.ValidateParams(fmt.Sprintf(
+		arr := validator.ValidateParams(fmt.Sprintf(
 			`[{"name":"--file","value":"%s","validate":["NotEmpty","IsFile"]}]`,
 			specfile,
 		))
-		if rgerr != nil {
-			return "", rgerr
+		if arr != nil {
+			return "", arr
 		}
 		return specfile, nil
 	}
@@ -51,13 +51,13 @@ func ChooseFileOrStdin(specfile string, use_stdin bool) (string, *airer.Airer) {
 
 func ReadFileOrStdin(maybe_file string) ([]byte, *airer.Airer) {
 	var raw_data []byte
-	var rgerr *airer.Airer
+	var arr *airer.Airer
 	if maybe_file == STDIN_IDENTIFIER {
 		raw_data = []byte(readFromStdin())
 	} else {
-		raw_data, rgerr = ReadFileInChunks(maybe_file)
-		if rgerr != nil {
-			return nil, rgerr
+		raw_data, arr = ReadFileInChunks(maybe_file)
+		if arr != nil {
+			return nil, arr
 		}
 	}
 	return raw_data, nil

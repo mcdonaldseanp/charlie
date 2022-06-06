@@ -8,18 +8,18 @@ import (
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/auth"
 	"github.com/mcdonaldseanp/charlie/localexec"
-	. "github.com/mcdonaldseanp/charlie/utils"
+	"github.com/mcdonaldseanp/charlie/validator"
 )
 
 func SetBranch(branch_name string, clear bool, pull bool) *airer.Airer {
 	// Don't need to validate bool params, there will be a type error
 	// if anything other than bools are passed
-	airr := ValidateParams(
-		[]Validator{
-			Validator{"branch_name", branch_name, []ValidateType{NotEmpty}},
-		})
-	if airr != nil {
-		return airr
+	arr := validator.ValidateParams(fmt.Sprintf(
+		`[{"name":"branch_name","value":"%s","validate":["NotEmpty"]}]`,
+		branch_name,
+	))
+	if arr != nil {
+		return arr
 	}
 	wt, airr := OpenWorktree()
 	if airr != nil {
@@ -33,7 +33,7 @@ func SetBranch(branch_name string, clear bool, pull bool) *airer.Airer {
 	if !clean && !clear {
 		return &airer.Airer{
 			Kind:    airer.ExecError,
-			Message: fmt.Sprintf("Cannot switch branch when work tree is not clean"),
+			Message: "Cannot switch branch when work tree is not clean",
 			Origin:  nil,
 		}
 	}
@@ -61,17 +61,18 @@ func SetBranch(branch_name string, clear bool, pull bool) *airer.Airer {
 func GetPR(pr_name string, clear bool, git_remote string) *airer.Airer {
 	// Don't need to validate bool params, there will be a type error
 	// if anything other than bools are passed
-	airr := ValidateParams(
-		[]Validator{
-			Validator{"branch_name", pr_name, []ValidateType{NotEmpty, IsNumber}},
-		})
-	if airr != nil {
-		return airr
+	arr := validator.ValidateParams(fmt.Sprintf(
+		`[{"name":"pr_name","value":"%s","validate":["NotEmpty", "IsNumber"]}]`,
+		pr_name,
+	))
+	if arr != nil {
+		return arr
 	}
+
 	new_branch_name := "PR" + pr_name
-	airr = localexec.ExecAsShell("git", "fetch", git_remote, "pull/"+pr_name+"/head:"+new_branch_name)
-	if airr != nil {
-		return airr
+	arr = localexec.ExecAsShell("git", "fetch", git_remote, "pull/"+pr_name+"/head:"+new_branch_name)
+	if arr != nil {
+		return arr
 	}
 	return SetBranch(new_branch_name, clear, false)
 }

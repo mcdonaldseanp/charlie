@@ -1,4 +1,4 @@
-package utils
+package find
 
 import (
 	"strings"
@@ -16,6 +16,6 @@ func LineWithSubStr(str string, substr string) string {
 	return result
 }
 
-func FirstLine(str string) (string) {
+func FirstLine(str string) string {
 	return strings.Split(str, "\n")[0]
 }

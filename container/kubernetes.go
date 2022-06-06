@@ -8,17 +8,18 @@ import (
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/localfile"
-	. "github.com/mcdonaldseanp/charlie/utils"
+	"github.com/mcdonaldseanp/charlie/validator"
 )
 
 func ConnectPod(podname string, port string) *airer.Airer {
-	airr := ValidateParams(
-		[]Validator{
-			Validator{"podname", podname, []ValidateType{NotEmpty}},
-		})
-	if airr != nil {
-		return airr
+	arr := validator.ValidateParams(fmt.Sprintf(
+		`[{"name":"podname","value":"%s","validate":["NotEmpty"]}]`,
+		podname,
+	))
+	if arr != nil {
+		return arr
 	}
+
 	// BE WARY OF INFINITE LOOPS DUE TO MATCHING NAMES
 	//
 	// If any case names in this switch match the podname param
@@ -29,12 +30,12 @@ func ConnectPod(podname string, port string) *airer.Airer {
 	}
 	// Validate port separately in case a cygnus name was passed and port
 	// is empty on the first function call.
-	airr = ValidateParams(
-		[]Validator{
-			Validator{"port", port, []ValidateType{NotEmpty, IsNumber}},
-		})
-	if airr != nil {
-		return airr
+	arr = validator.ValidateParams(fmt.Sprintf(
+		`[{"name":"port","value":"%s","validate":["NotEmpty","IsNumber"]}]`,
+		port,
+	))
+	if arr != nil {
+		return arr
 	}
 	forwarded_pods_file := os.Getenv("HOME") + "/.forwarded_pods"
 	cmd, airr := localexec.ExecDetached("kubectl", "port-forward", "pod/"+podname, port+":"+port)
@@ -54,12 +55,12 @@ func ConnectPod(podname string, port string) *airer.Airer {
 }
 
 func DisconnectPod(podname string) *airer.Airer {
-	airr := ValidateParams(
-		[]Validator{
-			Validator{"podname", podname, []ValidateType{NotEmpty}},
-		})
-	if airr != nil {
-		return airr
+	arr := validator.ValidateParams(fmt.Sprintf(
+		`[{"name":"podname","value":"%s","validate":["NotEmpty"]}]`,
+		podname,
+	))
+	if arr != nil {
+		return arr
 	}
 	switch podname {
 	case "director":

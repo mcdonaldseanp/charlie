@@ -82,17 +82,17 @@ func ExecScriptReadOutput(executable string, script string, args []string) (stri
 
 func BuildAndRunCommand(executable string, file string, script string, args []string) (string, string, *airer.Airer) {
 	var output, logs string
-	var rgerr *airer.Airer
+	var arr *airer.Airer
 	if len(file) > 0 {
 		final_args := append([]string{file}, args...)
-		output, logs, rgerr = ExecReadOutput(executable, final_args...)
+		output, logs, arr = ExecReadOutput(executable, final_args...)
 	} else if len(script) > 0 {
-		output, logs, rgerr = ExecScriptReadOutput(executable, script, args)
+		output, logs, arr = ExecScriptReadOutput(executable, script, args)
 	} else {
-		output, logs, rgerr = ExecReadOutput(executable, args...)
+		output, logs, arr = ExecReadOutput(executable, args...)
 	}
-	if rgerr != nil {
-		return output, logs, rgerr
+	if arr != nil {
+		return output, logs, arr
 	}
 
 	return output, logs, nil
