@@ -8,7 +8,6 @@ import (
 
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localfile"
-	"github.com/mcdonaldseanp/charlie/sanitize"
 )
 
 // ExecAsShell always writes everything to stderr so that
@@ -52,8 +51,8 @@ func ExecReadOutput(executable string, args ...string) (string, string, *airer.A
 	shell_command.Stdout = &stdout
 	shell_command.Stderr = &stderr
 	err := shell_command.Run()
-	output := sanitize.ReplaceAllNewlines(stdout.String())
-	logs := sanitize.ReplaceAllNewlines(stderr.String())
+	output := stdout.String()
+	logs := stderr.String()
 	if err != nil {
 		return output, logs, &airer.Airer{
 			Kind:    airer.ShellError,
