@@ -1,13 +1,14 @@
 package container
 
 import (
-	. "github.com/mcdonaldseanp/charlie/airer"
+	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
 	. "github.com/mcdonaldseanp/charlie/utils"
+	"github.com/mcdonaldseanp/charlie/winservice"
 )
 
-func StartDocker() *Airer {
-	airr := StartService("com.docker.service")
+func StartDocker() *airer.Airer {
+	airr := winservice.StartService("com.docker.service")
 	if airr != nil {
 		return airr
 	}
@@ -15,7 +16,7 @@ func StartDocker() *Airer {
 	return airr
 }
 
-func PublishContainer(name string, tag string, registry_url string) *Airer {
+func PublishContainer(name string, tag string, registry_url string) *airer.Airer {
 	airr := ValidateParams(
 		[]Validator{
 			Validator{"name", name, []ValidateType{NotEmpty}},

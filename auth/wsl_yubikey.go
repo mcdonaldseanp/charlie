@@ -7,6 +7,7 @@ import (
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/utils"
+	"github.com/mcdonaldseanp/charlie/winservice"
 )
 
 func findYubikeyBUSID() (string, *airer.Airer) {
@@ -35,7 +36,7 @@ func findYubikeyBUSID() (string, *airer.Airer) {
 }
 
 func MountYubikey() *airer.Airer {
-	airr := utils.StartService("usbipd")
+	airr := winservice.StartService("usbipd")
 	if airr != nil {
 		return airr
 	}

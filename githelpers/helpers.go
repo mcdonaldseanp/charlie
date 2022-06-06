@@ -1,12 +1,13 @@
-package utils
+package githelpers
 
 import (
-	"os"
 	"fmt"
+	"os"
 	"path/filepath"
+
+	"github.com/go-git/go-billy/v5/osfs"
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing/format/gitignore"
-	"github.com/go-git/go-billy/v5/osfs"
 	. "github.com/mcdonaldseanp/charlie/airer"
 )
 
@@ -32,7 +33,9 @@ func OpenRepo() (*git.Repository, *Airer) {
 
 func OpenWorktree() (*git.Worktree, *Airer) {
 	repo, airr := OpenRepo()
-	if airr != nil { return nil, airr }
+	if airr != nil {
+		return nil, airr
+	}
 
 	wt, err := repo.Worktree()
 	if err != nil {

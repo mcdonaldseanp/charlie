@@ -6,7 +6,6 @@ import (
 	"testing"
 
 	"github.com/mcdonaldseanp/charlie/localexec"
-	"github.com/mcdonaldseanp/charlie/utils"
 )
 
 func initRepo(t *testing.T) {
@@ -204,11 +203,11 @@ func TestBranchClear(t *testing.T) {
 		t.Fatalf("Branch is not correctly set, should be 'different', is '%s'\n", branch_now)
 	}
 	// Check that the work tree is clean again
-	wt, airr := utils.OpenWorktree()
+	wt, airr := OpenWorktree()
 	if airr != nil {
 		t.Fatalf("Getting the work tree failed: %s\n", airr)
 	}
-	clean, airr := utils.WorkTreeClean(wt)
+	clean, airr := WorkTreeClean(wt)
 	if airr != nil {
 		t.Fatalf("Getting the work tree failed: %s\n", airr)
 	}

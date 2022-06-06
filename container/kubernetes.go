@@ -7,6 +7,7 @@ import (
 
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
+	"github.com/mcdonaldseanp/charlie/localfile"
 	. "github.com/mcdonaldseanp/charlie/utils"
 )
 
@@ -41,7 +42,7 @@ func ConnectPod(podname string, port string) *airer.Airer {
 		return airr
 	}
 	pid := strconv.Itoa(cmd.Process.Pid)
-	forwarded_pods, airr := ReadJSONFile(forwarded_pods_file)
+	forwarded_pods, airr := localfile.ReadJSONFile(forwarded_pods_file)
 	if airr != nil {
 		return airr
 	}
@@ -49,7 +50,7 @@ func ConnectPod(podname string, port string) *airer.Airer {
 		forwarded_pods = make(map[string]interface{})
 	}
 	forwarded_pods[podname] = pid
-	return OverwriteJSONFile(forwarded_pods_file, forwarded_pods)
+	return localfile.OverwriteJSONFile(forwarded_pods_file, forwarded_pods)
 }
 
 func DisconnectPod(podname string) *airer.Airer {
@@ -65,7 +66,7 @@ func DisconnectPod(podname string) *airer.Airer {
 		podname = "pe-orchestration-services-0"
 	}
 	forwarded_pods_file := os.Getenv("HOME") + "/.forwarded_pods"
-	forwarded_pods, airr := ReadJSONFile(forwarded_pods_file)
+	forwarded_pods, airr := localfile.ReadJSONFile(forwarded_pods_file)
 	if airr != nil {
 		return airr
 	}
@@ -101,5 +102,5 @@ func DisconnectPod(podname string) *airer.Airer {
 		}
 	}
 	forwarded_pods[podname] = nil
-	return OverwriteJSONFile(forwarded_pods_file, forwarded_pods)
+	return localfile.OverwriteJSONFile(forwarded_pods_file, forwarded_pods)
 }

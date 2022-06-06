@@ -1,4 +1,4 @@
-package utils
+package winservice
 
 import (
 	"os/exec"
