@@ -1,36 +1,43 @@
 package gcloud
 
 import (
-	. "github.com/mcdonaldseanp/charlie/utils"
 	. "github.com/mcdonaldseanp/charlie/airer"
+	"github.com/mcdonaldseanp/charlie/localexec"
+	. "github.com/mcdonaldseanp/charlie/utils"
 )
 
-func InitializeGcloud() (*Airer) {
-	airr := ExecAsShell("gcloud", "auth", "login", "--no-launch-browser")
-	if airr != nil { return airr }
-	airr = ExecAsShell("gcloud", "config", "set", "project", "engineering-scratchpad")
+func InitializeGcloud() *Airer {
+	airr := localexec.ExecAsShell("gcloud", "auth", "login", "--no-launch-browser")
+	if airr != nil {
+		return airr
+	}
+	airr = localexec.ExecAsShell("gcloud", "config", "set", "project", "engineering-scratchpad")
 	return airr
 }
 
-func ResizeCluster(cluster_name string, num_nodes string) (*Airer) {
+func ResizeCluster(cluster_name string, num_nodes string) *Airer {
 	airr := ValidateParams(
-		[]Validator {
-			Validator{ "cluster_name", cluster_name, []ValidateType{ NotEmpty } },
-			Validator{ "num_nodes", num_nodes, []ValidateType{ NotEmpty, IsNumber } },
+		[]Validator{
+			Validator{"cluster_name", cluster_name, []ValidateType{NotEmpty}},
+			Validator{"num_nodes", num_nodes, []ValidateType{NotEmpty, IsNumber}},
 		})
-	if airr != nil { return airr }
-	airr = ExecAsShell("gcloud", "container", "clusters", "resize", cluster_name, "--num-nodes", num_nodes)
+	if airr != nil {
+		return airr
+	}
+	airr = localexec.ExecAsShell("gcloud", "container", "clusters", "resize", cluster_name, "--num-nodes", num_nodes)
 	return airr
 }
 
-func NewCluster(cluster_name string, num_nodes string) (*Airer) {
+func NewCluster(cluster_name string, num_nodes string) *Airer {
 	airr := ValidateParams(
-		[]Validator {
-			Validator{ "cluster_name", cluster_name, []ValidateType{ NotEmpty } },
-			Validator{ "num_nodes", num_nodes, []ValidateType{ NotEmpty, IsNumber } },
+		[]Validator{
+			Validator{"cluster_name", cluster_name, []ValidateType{NotEmpty}},
+			Validator{"num_nodes", num_nodes, []ValidateType{NotEmpty, IsNumber}},
 		})
-	if airr != nil { return airr }
-	return ExecAsShell(
+	if airr != nil {
+		return airr
+	}
+	return localexec.ExecAsShell(
 		"gcloud",
 		"container",
 		"clusters",
@@ -50,11 +57,13 @@ func NewCluster(cluster_name string, num_nodes string) (*Airer) {
 	)
 }
 
-func RemoveCluster(cluster_name string) (*Airer) {
+func RemoveCluster(cluster_name string) *Airer {
 	airr := ValidateParams(
-		[]Validator {
-			Validator{ "cluster_name", cluster_name, []ValidateType{ NotEmpty } },
+		[]Validator{
+			Validator{"cluster_name", cluster_name, []ValidateType{NotEmpty}},
 		})
-	if airr != nil { return airr }
-	return ExecAsShell("gcloud", "container", "clusters", "delete", cluster_name)
+	if airr != nil {
+		return airr
+	}
+	return localexec.ExecAsShell("gcloud", "container", "clusters", "delete", cluster_name)
 }

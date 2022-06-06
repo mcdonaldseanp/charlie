@@ -1,14 +1,16 @@
 package githelpers
 
 import (
-	"testing"
-	"strings"
 	"os"
-	. "github.com/mcdonaldseanp/charlie/utils"
+	"strings"
+	"testing"
+
+	"github.com/mcdonaldseanp/charlie/localexec"
+	"github.com/mcdonaldseanp/charlie/utils"
 )
 
 func initRepo(t *testing.T) {
-	_, _, airr := ExecReadOutput("git", "init")
+	_, _, airr := localexec.ExecReadOutput("git", "init")
 	if airr != nil {
 		t.Fatalf("Failed to create test repo: %s\n", airr)
 	}
@@ -17,22 +19,22 @@ func initRepo(t *testing.T) {
 		t.Fatalf("Failed to create test repo: %s\n", err)
 	}
 	f.Close()
-	_, _, airr = ExecReadOutput("git", "add", "--all")
+	_, _, airr = localexec.ExecReadOutput("git", "add", "--all")
 	if airr != nil {
 		t.Fatalf("Failed to create test repo: %s\n", airr)
 	}
-	_, _, airr = ExecReadOutput("git", "commit", "-m", "initial", "--no-gpg-sign")
+	_, _, airr = localexec.ExecReadOutput("git", "commit", "-m", "initial", "--no-gpg-sign")
 	if airr != nil {
 		t.Fatalf("Failed to create test repo: %s\n", airr)
 	}
-	_, _, airr = ExecReadOutput("git", "checkout", "-B", "main")
+	_, _, airr = localexec.ExecReadOutput("git", "checkout", "-B", "main")
 	if airr != nil {
 		t.Fatalf("Failed to create test repo: %s\n", airr)
 	}
 }
 
 func getBranch(t *testing.T) string {
-	result, _, airr := ExecReadOutput("git", "rev-parse", "--abbrev-ref", "HEAD")
+	result, _, airr := localexec.ExecReadOutput("git", "rev-parse", "--abbrev-ref", "HEAD")
 	if airr != nil {
 		t.Fatalf("Failed to read branch: %s\n", airr)
 	}
@@ -41,11 +43,11 @@ func getBranch(t *testing.T) string {
 
 func fakeCommit(dir string, t *testing.T) {
 	fakeFile(dir, t)
-	_, _, airr := ExecReadOutput("git", "add", "--all")
+	_, _, airr := localexec.ExecReadOutput("git", "add", "--all")
 	if airr != nil {
 		t.Fatalf("Failed to create new commit: %s\n", airr)
 	}
-	_, _, airr = ExecReadOutput("git", "commit", "-m", "fake", "--no-gpg-sign")
+	_, _, airr = localexec.ExecReadOutput("git", "commit", "-m", "fake", "--no-gpg-sign")
 	if airr != nil {
 		t.Fatalf("Failed to create new commit: %s\n", airr)
 	}
@@ -117,7 +119,7 @@ func TestBranchDifferent(t *testing.T) {
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, _, airr := ExecReadOutput("git", "checkout", "-B", "different")
+	_, _, airr := localexec.ExecReadOutput("git", "checkout", "-B", "different")
 	if airr != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", airr)
 	}
@@ -147,7 +149,7 @@ func TestBranchDirty(t *testing.T) {
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, _, airr := ExecReadOutput("git", "checkout", "-B", "different")
+	_, _, airr := localexec.ExecReadOutput("git", "checkout", "-B", "different")
 	if airr != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", airr)
 	}
@@ -179,7 +181,7 @@ func TestBranchClear(t *testing.T) {
 	defer os.Chdir(originaldir)
 	os.Chdir(testdir)
 	initRepo(t)
-	_, _, airr := ExecReadOutput("git", "checkout", "-B", "different")
+	_, _, airr := localexec.ExecReadOutput("git", "checkout", "-B", "different")
 	if airr != nil {
 		t.Fatalf("Creating second git branch failed: %s\n", airr)
 	}
@@ -202,11 +204,11 @@ func TestBranchClear(t *testing.T) {
 		t.Fatalf("Branch is not correctly set, should be 'different', is '%s'\n", branch_now)
 	}
 	// Check that the work tree is clean again
-	wt, airr := OpenWorktree()
+	wt, airr := utils.OpenWorktree()
 	if airr != nil {
 		t.Fatalf("Getting the work tree failed: %s\n", airr)
 	}
-	clean, airr := WorkTreeClean(wt)
+	clean, airr := utils.WorkTreeClean(wt)
 	if airr != nil {
 		t.Fatalf("Getting the work tree failed: %s\n", airr)
 	}
