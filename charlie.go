@@ -3,67 +3,23 @@ package main
 import (
 	"flag"
 	"fmt"
-	. "github.com/mcdonaldseanp/charlie/airer"
+	"os"
+
 	"github.com/mcdonaldseanp/charlie/auth"
+	"github.com/mcdonaldseanp/charlie/cli"
 	"github.com/mcdonaldseanp/charlie/container"
 	"github.com/mcdonaldseanp/charlie/cygnus"
 	"github.com/mcdonaldseanp/charlie/gcloud"
 	"github.com/mcdonaldseanp/charlie/githelpers"
-	"os"
+	"github.com/mcdonaldseanp/charlie/version"
 )
-
-type CLICommand struct {
-	Verb        string
-	Noun        string
-	ExecutionFn func()
-}
-
-func shouldHaveArgs(num_args int, usage string, description string, flagset *flag.FlagSet) {
-	real_args := num_args + 1
-	passed_fs := flagset != nil
-	for _, arg := range os.Args {
-		if arg == "-h" {
-			fmt.Fprintf(os.Stderr, "Usage:\n  %s\n\nDescription:\n  %s\n\n", usage, description)
-			if passed_fs {
-				fmt.Fprintf(os.Stderr, "Available flags:\n")
-				flagset.PrintDefaults()
-			}
-			os.Exit(0)
-		}
-	}
-	if len(os.Args) < real_args {
-		fmt.Fprintf(os.Stderr, "AIRER running command:\n\nInvalid input, not enough arguments.\n\nUsage:\n  %s\n\nDescription:\n  %s\n\n", usage, description)
-		if passed_fs {
-			fmt.Fprintf(os.Stderr, "Available flags:\n")
-			flagset.PrintDefaults()
-		}
-		os.Exit(1)
-	} else if len(os.Args) > real_args && passed_fs {
-		flagset.Parse(os.Args[real_args:])
-	}
-}
-
-func handleCommandAirer(airr *Airer, usage string, description string, flagset *flag.FlagSet) {
-	if airr != nil {
-		if airr.Kind == InvalidInput {
-			fmt.Fprintf(os.Stderr, "%s\nUsage:\n  %s\n\nDescription:\n  %s\n\n", airr, usage, description)
-			if flagset != nil {
-				flagset.PrintDefaults()
-			}
-		} else {
-			fmt.Fprintf(os.Stderr, "AIRER running command:\n\n%s\n", airr)
-		}
-		os.Exit(1)
-	}
-	os.Exit(0)
-}
 
 func main() {
 	// None of the commands below should call .Parse on any
-	// flagsets directly. shouldHaveArgs() will call .Parse
+	// flagsets directly. cli.ShouldHaveArgs() will call .Parse
 	// on the flagset if it is passed one.
 	//
-	// Things need to be parsed inside shouldHaveArgs so that
+	// Things need to be parsed inside cli.ShouldHaveArgs so that
 	// the flag package can ignore any required commands
 	// before parsing
 
@@ -101,14 +57,16 @@ func main() {
 	// https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.2
 	//
 	// Also, try to keep these in alphabetical order. The list is already long enough
-	command_list := []CLICommand{
-		{"add", "commit",
-			func() {
+	command_list := []cli.Command{
+		{
+			Verb: "add",
+			Noun: "commit",
+			ExecutionFn: func() {
 				usage := "charlie new commit [FLAGS]"
 				description := "Add all changes in the work tree to previous commit"
 				no_edit := git_commit_fs.Bool("no-edit", false, "Commit all changes without changing commit message")
-				shouldHaveArgs(2, usage, description, git_commit_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, git_commit_fs)
+				cli.HandleCommandAirer(
 					githelpers.AddCommit(*no_edit),
 					usage,
 					description,
@@ -116,18 +74,20 @@ func main() {
 				)
 			},
 		},
-		{"connect", "pod",
-			func() {
+		{
+			Verb: "connect",
+			Noun: "pod",
+			ExecutionFn: func() {
 				usage := "charlie connect pod [POD NAME] [PORT]"
 				description := "Use kubectl port-forward to open connection to a k8s pod, PORT can be omitted\n if POD NAME is a cygnus service name"
 				// If this ever gets passed a flagset, the if statement below
 				// needs to check if os.Args[4] is expected to be a flag or not
-				shouldHaveArgs(3, usage, description, nil)
+				cli.ShouldHaveArgs(3, usage, description, nil)
 				port_num := ""
 				if len(os.Args) >= 5 {
 					port_num = os.Args[4]
 				}
-				handleCommandAirer(
+				cli.HandleCommandAirer(
 					container.ConnectPod(os.Args[3], port_num),
 					usage,
 					description,
@@ -135,12 +95,14 @@ func main() {
 				)
 			},
 		},
-		{"deploy", "cygnus",
-			func() {
+		{
+			Verb: "deploy",
+			Noun: "cygnus",
+			ExecutionFn: func() {
 				usage := "charlie deploy cygnus [FLAGS]"
 				description := "Deploy local changes of Cygnus to GKE"
-				shouldHaveArgs(2, usage, description, cygnus_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, cygnus_fs)
+				cli.HandleCommandAirer(
 					cygnus.DeployCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
 					usage,
 					description,
@@ -148,12 +110,14 @@ func main() {
 				)
 			},
 		},
-		{"disconnect", "pod",
-			func() {
+		{
+			Verb: "disconnect",
+			Noun: "pod",
+			ExecutionFn: func() {
 				usage := "charlie disconnect pod [POD NAME]"
 				description := "stop port fowarding from a k8s pod"
-				shouldHaveArgs(3, usage, description, nil)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(3, usage, description, nil)
+				cli.HandleCommandAirer(
 					container.DisconnectPod(os.Args[3]),
 					usage,
 					description,
@@ -161,13 +125,15 @@ func main() {
 				)
 			},
 		},
-		{"get", "pr",
-			func() {
+		{
+			Verb: "get",
+			Noun: "pr",
+			ExecutionFn: func() {
 				git_remote := git_branch_fs.String("remote", "upstream", "git remote to pull PR from")
 				usage := "charlie get pr [PR NUMBER] [FLAGS]"
 				description := "Check out contents of a PR from github"
-				shouldHaveArgs(3, usage, description, git_branch_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(3, usage, description, git_branch_fs)
+				cli.HandleCommandAirer(
 					githelpers.GetPR(os.Args[3], *clear_branch, *git_remote),
 					usage,
 					description,
@@ -175,12 +141,14 @@ func main() {
 				)
 			},
 		},
-		{"initialize", "gcloud",
-			func() {
+		{
+			Verb: "initialize",
+			Noun: "gcloud",
+			ExecutionFn: func() {
 				usage := "charlie initialize gcloud"
 				description := "initialize and authorize gcloud CLI"
-				shouldHaveArgs(2, usage, description, nil)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, nil)
+				cli.HandleCommandAirer(
 					gcloud.InitializeGcloud(),
 					usage,
 					description,
@@ -188,12 +156,14 @@ func main() {
 				)
 			},
 		},
-		{"install", "cygnus",
-			func() {
+		{
+			Verb: "install",
+			Noun: "cygnus",
+			ExecutionFn: func() {
 				usage := "charlie install cygnus [FLAGS]"
 				description := "Deploy a new instance of Cygnus to GKE"
-				shouldHaveArgs(2, usage, description, cygnus_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, cygnus_fs)
+				cli.HandleCommandAirer(
 					cygnus.InstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
 					usage,
 					description,
@@ -201,12 +171,14 @@ func main() {
 				)
 			},
 		},
-		{"mount", "yubikey",
-			func() {
+		{
+			Verb: "mount",
+			Noun: "yubikey",
+			ExecutionFn: func() {
 				usage := "charlie mount yubikey"
 				description := "Connect yubikey to WSL instance"
-				shouldHaveArgs(2, usage, description, nil)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, nil)
+				cli.HandleCommandAirer(
 					auth.MountYubikey(),
 					usage,
 					description,
@@ -214,25 +186,30 @@ func main() {
 				)
 			},
 		},
-		{"new", "commit",
-			func() {
-				usage := "charlie new commit"
+		{
+			Verb: "new",
+			Noun: "commit",
+			ExecutionFn: func() {
+				usage := "charlie new commit [FLAGS]"
 				description := "create new commit from all changes in the work tree"
-				shouldHaveArgs(2, usage, description, nil)
-				handleCommandAirer(
-					githelpers.NewCommit(),
+				message := git_commit_fs.String("message", "", "Provide the commit message")
+				cli.ShouldHaveArgs(2, usage, description, git_commit_fs)
+				cli.HandleCommandAirer(
+					githelpers.NewCommit(*message),
 					usage,
 					description,
-					nil,
+					git_commit_fs,
 				)
 			},
 		},
-		{"new", "cluster",
-			func() {
+		{
+			Verb: "new",
+			Noun: "cluster",
+			ExecutionFn: func() {
 				usage := "charlie new cluster [SIZE] [FLAGS]"
 				description := "Create a new GKE cluster with the given SIZE of nodes. Defaults to creating\n cluster with name from MY_CLUSTER env var"
-				shouldHaveArgs(3, usage, description, gcloud_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(3, usage, description, gcloud_fs)
+				cli.HandleCommandAirer(
 					gcloud.NewCluster(*cluster_name, os.Args[3]),
 					usage,
 					description,
@@ -240,12 +217,14 @@ func main() {
 				)
 			},
 		},
-		{"publish", "container",
-			func() {
+		{
+			Verb: "publish",
+			Noun: "container",
+			ExecutionFn: func() {
 				usage := "charlie publish container [CONTAINER NAME] [NEW TAG] [FLAGS]"
 				description := "publish the container that was last built locally to a container registry.\nDefaults to using DEFAULT_CONTAINER_REGISTRY env var"
-				shouldHaveArgs(4, usage, description, con_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(4, usage, description, con_fs)
+				cli.HandleCommandAirer(
 					container.PublishContainer(os.Args[3], os.Args[4], *container_registry),
 					usage,
 					description,
@@ -253,16 +232,18 @@ func main() {
 				)
 			},
 		},
-		{"read", "kotsip",
-			func() {
+		{
+			Verb: "read",
+			Noun: "kotsip",
+			ExecutionFn: func() {
 				usage := "charlie read kotsip"
 				description := "Read the ip that KOTS_IP should be set to"
-				shouldHaveArgs(2, usage, description, nil)
+				cli.ShouldHaveArgs(2, usage, description, nil)
 				output, airr := cygnus.ReadKOTSIP()
 				if airr == nil {
 					fmt.Printf("%s", output)
 				}
-				handleCommandAirer(
+				cli.HandleCommandAirer(
 					airr,
 					usage,
 					description,
@@ -270,12 +251,14 @@ func main() {
 				)
 			},
 		},
-		{"remove", "cluster",
-			func() {
+		{
+			Verb: "remove",
+			Noun: "cluster",
+			ExecutionFn: func() {
 				usage := "charlie remove cluster [FLAGS]"
 				description := "Remove GKE cluster. Defaults to removing cluster with name from MY_CLUSTER \nenv var"
-				shouldHaveArgs(2, usage, description, gcloud_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, gcloud_fs)
+				cli.HandleCommandAirer(
 					gcloud.RemoveCluster(*cluster_name),
 					usage,
 					description,
@@ -283,12 +266,14 @@ func main() {
 				)
 			},
 		},
-		{"repair", "yubikey",
-			func() {
+		{
+			Verb: "repair",
+			Noun: "yubikey",
+			ExecutionFn: func() {
 				usage := "charlie repair yubikey"
 				description := "attempt to repair yubikey connection to WSL instance"
-				shouldHaveArgs(2, usage, description, nil)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, nil)
+				cli.HandleCommandAirer(
 					auth.RepairYubikey(),
 					usage,
 					description,
@@ -296,12 +281,14 @@ func main() {
 				)
 			},
 		},
-		{"resize", "cluster",
-			func() {
+		{
+			Verb: "resize",
+			Noun: "cluster",
+			ExecutionFn: func() {
 				usage := "charlie resize cluster [SIZE] [FLAGS]"
 				description := "resize GKE cluster to given SIZE. Defaults to resizing cluster with name \nfrom MY_CLUSTER env var"
-				shouldHaveArgs(3, usage, description, gcloud_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(3, usage, description, gcloud_fs)
+				cli.HandleCommandAirer(
 					gcloud.ResizeCluster(*cluster_name, os.Args[3]),
 					usage,
 					description,
@@ -309,13 +296,15 @@ func main() {
 				)
 			},
 		},
-		{"set", "branch",
-			func() {
+		{
+			Verb: "set",
+			Noun: "branch",
+			ExecutionFn: func() {
 				pull_branch := git_branch_fs.Bool("pull", false, "pull from upstream")
 				usage := "charlie set branch [BRANCH NAME] [FLAGS]"
 				description := "set git repo to new branch"
-				shouldHaveArgs(3, usage, description, git_branch_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(3, usage, description, git_branch_fs)
+				cli.HandleCommandAirer(
 					githelpers.SetBranch(os.Args[3], *clear_branch, *pull_branch),
 					usage,
 					description,
@@ -323,12 +312,14 @@ func main() {
 				)
 			},
 		},
-		{"start", "docker",
-			func() {
+		{
+			Verb: "start",
+			Noun: "docker",
+			ExecutionFn: func() {
 				usage := "charlie start docker"
 				description := "start the docker service on localhost"
-				shouldHaveArgs(2, usage, description, nil)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, nil)
+				cli.HandleCommandAirer(
 					container.StartDocker(),
 					usage,
 					description,
@@ -336,12 +327,14 @@ func main() {
 				)
 			},
 		},
-		{"uninstall", "cygnus",
-			func() {
+		{
+			Verb: "uninstall",
+			Noun: "cygnus",
+			ExecutionFn: func() {
 				usage := "charlie uninstall cygnus [FLAGS]"
 				description := "Run destroy-application to tear down an existing cygnus instance"
-				shouldHaveArgs(2, usage, description, cygnus_fs)
-				handleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, cygnus_fs)
+				cli.HandleCommandAirer(
 					cygnus.UninstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
 					usage,
 					description,
@@ -349,19 +342,22 @@ func main() {
 				)
 			},
 		},
+		{
+			Verb: "update",
+			Noun: "version",
+			ExecutionFn: func() {
+				usage := "charlie update version [VERSION FILE] [NEW VERSION]"
+				description := "Update charlie's version"
+				cli.ShouldHaveArgs(4, usage, description, cygnus_fs)
+				cli.HandleCommandAirer(
+					version.UpdateVersion(os.Args[3], os.Args[4]),
+					usage,
+					description,
+					nil,
+				)
+			},
+		},
 	}
 
-	if len(os.Args) > 1 {
-		for _, command := range command_list {
-			if os.Args[1] == command.Verb && os.Args[2] == command.Noun {
-				command.ExecutionFn()
-			}
-		}
-	}
-	fmt.Printf("Unknown command.\n\nUsage:\n  charlie [COMMAND] [OBJECT] [ARGUMENTS] [FLAGS]\n\n")
-	fmt.Printf("Available commands:\n")
-	for _, command := range command_list {
-		fmt.Printf("    %s %s\n", command.Verb, command.Noun)
-	}
-	os.Exit(1)
+	cli.RunCommand("charlie", command_list)
 }
