@@ -2,9 +2,11 @@ package kubernetes
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
+	"github.com/mcdonaldseanp/charlie/remotefile"
 	"github.com/mcdonaldseanp/charlie/validator"
 	"github.com/mcdonaldseanp/charlie/version"
 )
@@ -22,7 +24,12 @@ func (kc KindCluster) NewClusterOfType(conf_loc string, extra_flags []string) *a
 		return arr
 	}
 	if len(conf_loc) < 1 {
-		conf_loc = version.ReleaseArtifact("kind_config.yaml")
+		tmpfile, arr := remotefile.DownloadTemp(version.ReleaseArtifact("kind_config.yaml"))
+		if arr != nil {
+			return arr
+		}
+		defer os.Remove(tmpfile)
+		conf_loc = tmpfile
 	}
 	return localexec.ExecAsShell("kind", "create", "cluster", "--config", conf_loc, "--name", string(kc))
 }

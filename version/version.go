@@ -46,5 +46,5 @@ func UpdateVersion(version_file string, new_version string) *airer.Airer {
 }
 
 func ReleaseArtifact(name string) string {
-	return fmt.Sprintf("https://github.com/puppetlabs/regulator/releases/download/%s/%s", VERSION, name)
+	return fmt.Sprintf("https://github.com/mcdonaldseanp/charlie/releases/download/%s/%s", VERSION, name)
 }
