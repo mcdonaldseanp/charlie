@@ -68,7 +68,6 @@ func readClusterType(cluster_name string) (string, *airer.Airer) {
 	if arr != nil {
 		return "", arr
 	}
-	fmt.Print(data)
 	this_cluster_type, ok := data[cluster_name]
 	if ok == false {
 		return "", &airer.Airer{
