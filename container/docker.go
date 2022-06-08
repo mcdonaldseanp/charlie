@@ -14,7 +14,11 @@ import (
 func StartDocker() *airer.Airer {
 	// Make sure that the workspace is bind mounted to the cross distro space so that
 	// k8s things can mount from localhost
-	arr := localexec.ExecAsShell("sudo", "mount", "--bind", os.Getenv("HOME")+"/Workspace", "/wsl/Workspace/")
+	arr := localexec.ExecAsShell("sudo", "mkdir", "-p", "/wsl/Workspace/")
+	if arr != nil {
+		return arr
+	}
+	arr = localexec.ExecAsShell("sudo", "mount", "--bind", os.Getenv("HOME")+"/Workspace", "/wsl/Workspace/")
 	if arr != nil {
 		return arr
 	}

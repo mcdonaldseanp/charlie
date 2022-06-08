@@ -44,3 +44,7 @@ func UpdateVersion(version_file string, new_version string) *airer.Airer {
 	}
 	return localfile.OverwriteFile(version_file, []byte(result))
 }
+
+func ReleaseArtifact(name string) string {
+	return fmt.Sprintf("https://github.com/puppetlabs/regulator/releases/download/%s/%s", VERSION, name)
+}

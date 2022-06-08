@@ -1,16 +1,24 @@
 GO_PACKAGES=. ./airer ./auth ./cli ./container ./cygnus ./find ./gcloud ./githelpers ./localexec ./localfile ./sanitize ./validator ./version ./winservice
 GO_MODULE_NAME=github.com/mcdonaldseanp/charlie
 GO_BIN_NAME=charlie
+RELEASE_ARTIFACTS=./kubernetes/kind_config.yaml
 
 # Make the build dir, and remove any go bins already there
 setup:
 	mkdir -p output/
-	rm -rf output/$(GO_BIN_NAME)
+	cd output && \
+	rm -f $(GO_BIN_NAME) && \
+	for ATFC in $(RELEASE_ARTIFACTS); do \
+		rm -f $$(basename $$ATFC); \
+	done
 
 # Actually build the thing
 build: setup
 	go mod tidy
 	go build -o output/ $(GO_MODULE_NAME)
+	for ATFC in $(RELEASE_ARTIFACTS); do \
+		cp $$ATFC output/; \
+	done
 
 install:
 	go mod tidy
@@ -32,4 +40,4 @@ else
 endif
 
 format:
-	go fmt $(REGULATOR_GO_PACKAGES)
+	go fmt $(GO_PACKAGES)

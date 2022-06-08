@@ -4,13 +4,14 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"strings"
 
 	"github.com/mcdonaldseanp/charlie/auth"
 	"github.com/mcdonaldseanp/charlie/cli"
 	"github.com/mcdonaldseanp/charlie/container"
 	"github.com/mcdonaldseanp/charlie/cygnus"
-	"github.com/mcdonaldseanp/charlie/gcloud"
 	"github.com/mcdonaldseanp/charlie/githelpers"
+	"github.com/mcdonaldseanp/charlie/kubernetes"
 	"github.com/mcdonaldseanp/charlie/version"
 )
 
@@ -30,11 +31,10 @@ func main() {
 	// Git commit shared flags
 	git_commit_fs := flag.NewFlagSet("git_commit", flag.ExitOnError)
 
-	// Gcloud shared flags
-	gcloud_fs := flag.NewFlagSet("gcloud", flag.ExitOnError)
-	cluster_name := gcloud_fs.String("cluster-name",
-		os.Getenv("MY_CLUSTER"),
-		"Execute against a specific cluster")
+	// Kubernetes create shared flags
+	k8s_create_fs := flag.NewFlagSet("k8s_create_fs", flag.ExitOnError)
+	k8s_create_conf_loc := k8s_create_fs.String("conf-loc", "", "Location on disk where the configuration file is for the cluster create command")
+	k8s_create_extra_flags := k8s_create_fs.String("extra-flags", "", "Any additional flags to be sent with the cluster creation command")
 
 	// Container shared flags
 	con_fs := flag.NewFlagSet("container", flag.ExitOnError)
@@ -88,7 +88,7 @@ func main() {
 					port_num = os.Args[4]
 				}
 				cli.HandleCommandAirer(
-					container.ConnectPod(os.Args[3], port_num),
+					kubernetes.ConnectPod(os.Args[3], port_num),
 					usage,
 					description,
 					nil,
@@ -118,7 +118,7 @@ func main() {
 				description := "stop port fowarding from a k8s pod"
 				cli.ShouldHaveArgs(3, usage, description, nil)
 				cli.HandleCommandAirer(
-					container.DisconnectPod(os.Args[3]),
+					kubernetes.DisconnectPod(os.Args[3]),
 					usage,
 					description,
 					nil,
@@ -149,7 +149,7 @@ func main() {
 				description := "initialize and authorize gcloud CLI"
 				cli.ShouldHaveArgs(2, usage, description, nil)
 				cli.HandleCommandAirer(
-					gcloud.InitializeGcloud(),
+					kubernetes.InitializeGcloud(),
 					usage,
 					description,
 					nil,
@@ -206,14 +206,15 @@ func main() {
 			Verb: "new",
 			Noun: "cluster",
 			ExecutionFn: func() {
-				usage := "charlie new cluster [SIZE] [FLAGS]"
-				description := "Create a new GKE cluster with the given SIZE of nodes. Defaults to creating\n cluster with name from MY_CLUSTER env var"
-				cli.ShouldHaveArgs(3, usage, description, gcloud_fs)
+				usage := "charlie new cluster [TYPE] [NAME] [FLAGS]"
+				description := "Create a new kubernetes cluster of the given TYPE with name NAME. \nTYPE should be one of 'gke','kind'"
+				cli.ShouldHaveArgs(4, usage, description, k8s_create_fs)
+				extra_flags := strings.Split(*k8s_create_extra_flags, ",")
 				cli.HandleCommandAirer(
-					gcloud.NewCluster(*cluster_name, os.Args[3]),
+					kubernetes.NewCluster(os.Args[3], os.Args[4], *k8s_create_conf_loc, extra_flags),
 					usage,
 					description,
-					gcloud_fs,
+					k8s_create_fs,
 				)
 			},
 		},
@@ -255,14 +256,14 @@ func main() {
 			Verb: "remove",
 			Noun: "cluster",
 			ExecutionFn: func() {
-				usage := "charlie remove cluster [FLAGS]"
+				usage := "charlie remove cluster [NAME]"
 				description := "Remove GKE cluster. Defaults to removing cluster with name from MY_CLUSTER \nenv var"
-				cli.ShouldHaveArgs(2, usage, description, gcloud_fs)
+				cli.ShouldHaveArgs(3, usage, description, nil)
 				cli.HandleCommandAirer(
-					gcloud.RemoveCluster(*cluster_name),
+					kubernetes.RemoveCluster(os.Args[3]),
 					usage,
 					description,
-					gcloud_fs,
+					nil,
 				)
 			},
 		},
@@ -285,14 +286,14 @@ func main() {
 			Verb: "resize",
 			Noun: "cluster",
 			ExecutionFn: func() {
-				usage := "charlie resize cluster [SIZE] [FLAGS]"
-				description := "resize GKE cluster to given SIZE. Defaults to resizing cluster with name \nfrom MY_CLUSTER env var"
-				cli.ShouldHaveArgs(3, usage, description, gcloud_fs)
+				usage := "charlie resize cluster [NAME] [SIZE]"
+				description := "resize Kubernetes cluster NAME to given SIZE"
+				cli.ShouldHaveArgs(3, usage, description, nil)
 				cli.HandleCommandAirer(
-					gcloud.ResizeCluster(*cluster_name, os.Args[3]),
+					kubernetes.ResizeCluster(os.Args[3], os.Args[4]),
 					usage,
 					description,
-					gcloud_fs,
+					nil,
 				)
 			},
 		},

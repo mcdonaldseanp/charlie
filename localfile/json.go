@@ -8,15 +8,14 @@ import (
 	"github.com/mcdonaldseanp/charlie/airer"
 )
 
-func ReadJSONFile(location string) (map[string]interface{}, *airer.Airer) {
+func ReadJSONFile(location string, data interface{}) *airer.Airer {
 	json_blob, airr := ReadFileInChunks(location)
 	if airr != nil {
-		return nil, airr
+		return airr
 	}
 
-	var data map[string]interface{}
 	json.Unmarshal(json_blob, &data)
-	return data, nil
+	return nil
 }
 
 func OverwriteJSONFile(location string, data interface{}) *airer.Airer {

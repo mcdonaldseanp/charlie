@@ -1,4 +1,4 @@
-package gcloud
+package kubernetes
 
 import (
 	"fmt"
@@ -7,6 +7,8 @@ import (
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/validator"
 )
+
+type GKECluster string
 
 func InitializeGcloud() *airer.Airer {
 	airr := localexec.ExecAsShell("gcloud", "auth", "login", "--no-launch-browser")
@@ -32,14 +34,13 @@ func ResizeCluster(cluster_name string, num_nodes string) *airer.Airer {
 	return localexec.ExecAsShell("gcloud", "container", "clusters", "resize", cluster_name, "--num-nodes", num_nodes)
 }
 
-func NewCluster(cluster_name string, num_nodes string) *airer.Airer {
+func (gkec GKECluster) NewClusterOfType(conf_loc string, extra_flags []string) *airer.Airer {
+	// Only cluster_name is required, so that's the only thing to validate
 	arr := validator.ValidateParams(fmt.Sprintf(
 		`[
-			{"name":"cluster_name","value":"%s","validate":["NotEmpty"]},
-			{"name":"num_nodes","value":"%s","validate":["NotEmpty", "IsNumber"]}
+			{"name":"cluster_name","value":"%s","validate":["NotEmpty"]}
 		]`,
-		cluster_name,
-		num_nodes,
+		string(gkec),
 	))
 	if arr != nil {
 		return arr
@@ -49,13 +50,13 @@ func NewCluster(cluster_name string, num_nodes string) *airer.Airer {
 		"container",
 		"clusters",
 		"create",
-		cluster_name,
+		string(gkec),
 		"--release-channel",
 		"None",
 		"--machine-type",
 		"e2-custom-6-16384",
 		"--num-nodes",
-		num_nodes,
+		"1",
 		"--addons",
 		"HorizontalPodAutoscaling,HttpLoadBalancing,GcePersistentDiskCsiDriver",
 		"--no-enable-autoupgrade",
@@ -64,13 +65,13 @@ func NewCluster(cluster_name string, num_nodes string) *airer.Airer {
 	)
 }
 
-func RemoveCluster(cluster_name string) *airer.Airer {
+func (gkec GKECluster) RemoveClusterOfType() *airer.Airer {
 	arr := validator.ValidateParams(fmt.Sprintf(
 		`[{"name":"cluster_name","value":"%s","validate":["NotEmpty"]}]`,
-		cluster_name,
+		string(gkec),
 	))
 	if arr != nil {
 		return arr
 	}
-	return localexec.ExecAsShell("gcloud", "container", "clusters", "delete", cluster_name)
+	return localexec.ExecAsShell("gcloud", "container", "clusters", "delete", string(gkec))
 }
