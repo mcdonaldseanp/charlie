@@ -2,6 +2,7 @@ package container
 
 import (
 	"fmt"
+	"os"
 
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/find"
@@ -11,12 +12,18 @@ import (
 )
 
 func StartDocker() *airer.Airer {
-	airr := winservice.StartService("com.docker.service")
-	if airr != nil {
-		return airr
+	// Make sure that the workspace is bind mounted to the cross distro space so that
+	// k8s things can mount from localhost
+	arr := localexec.ExecAsShell("sudo", "mount", "--bind", os.Getenv("HOME")+"/Workspace", "/wsl/Workspace/")
+	if arr != nil {
+		return arr
 	}
-	_, airr = localexec.ExecDetached("/c/Program Files/Docker/Docker/Docker Desktop.exe")
-	return airr
+	arr = winservice.StartService("com.docker.service")
+	if arr != nil {
+		return arr
+	}
+	_, arr = localexec.ExecDetached("/c/Program Files/Docker/Docker/Docker Desktop.exe")
+	return arr
 }
 
 func PublishContainer(name string, tag string, registry_url string) *airer.Airer {
