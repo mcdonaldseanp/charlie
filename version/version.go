@@ -9,7 +9,7 @@ import (
 	"github.com/mcdonaldseanp/charlie/validator"
 )
 
-const VERSION string = "v0.0.3"
+const VERSION string = "v0.0.4"
 
 func UpdateVersion(version_file string, new_version string) *airer.Airer {
 	arr := validator.ValidateParams(fmt.Sprintf(
