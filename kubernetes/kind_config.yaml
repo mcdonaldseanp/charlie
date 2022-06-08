@@ -5,7 +5,7 @@ nodes:
   # add a mount from /path/to/my/files on the host to /files on the node
   extraMounts:
   - hostPath: /wsl/Workspace
-    containerPath: /files
+    containerPath: /Workspace
     # optional: if set, the mount is read-only.
     # default false
     readOnly: false
