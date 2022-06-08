@@ -51,7 +51,6 @@ func DownloadTemp(url string) (string, *airer.Airer) {
 	}
 	defer resp.Body.Close()
 	data, arr := readBody(*resp)
-	fmt.Print(string(data))
 	if arr != nil {
 		return "", arr
 	}
