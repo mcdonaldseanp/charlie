@@ -1,14 +1,13 @@
-package remotefile
+package remotedata
 
 import (
 	"fmt"
 	"io"
 	"log"
 	"net/http"
-	"os"
 
 	"github.com/mcdonaldseanp/charlie/airer"
-	"github.com/mcdonaldseanp/charlie/localfile"
+	"github.com/mcdonaldseanp/charlie/replacers"
 )
 
 func readBody(resp http.Response) ([]byte, *airer.Airer) {
@@ -35,16 +34,7 @@ func readBody(resp http.Response) ([]byte, *airer.Airer) {
 	return file_contents, nil
 }
 
-func DownloadTemp(url string) (string, *airer.Airer) {
-	f, err := os.CreateTemp("", "kind_config.yaml")
-	if err != nil {
-		return "", &airer.Airer{
-			Kind:    airer.ShellError,
-			Message: "Could not create tmp file!",
-			Origin:  err,
-		}
-	}
-	filename := f.Name()
+func Download(url string) ([]byte, *airer.Airer) {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -52,8 +42,15 @@ func DownloadTemp(url string) (string, *airer.Airer) {
 	defer resp.Body.Close()
 	data, arr := readBody(*resp)
 	if arr != nil {
+		return nil, arr
+	}
+	return data, nil
+}
+
+func ParsedDownload(url string) (string, *airer.Airer) {
+	data, arr := Download(url)
+	if arr != nil {
 		return "", arr
 	}
-	localfile.OverwriteFile(filename, data)
-	return filename, nil
+	return replacers.ReplaceVarsWithEnv(data)
 }

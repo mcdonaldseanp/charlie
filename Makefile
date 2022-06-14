@@ -1,4 +1,4 @@
-GO_PACKAGES=. ./airer ./auth ./cli ./container ./cygnus ./find ./githelpers ./kubernetes ./localexec ./localfile ./remotefile ./sanitize ./validator ./version ./winservice
+GO_PACKAGES=. ./airer ./auth ./cli ./container ./cygnus ./find ./githelpers ./kubernetes ./localexec ./localfile ./remotedata ./replacers ./sanitize ./validator ./version ./winservice
 GO_MODULE_NAME=github.com/mcdonaldseanp/charlie
 GO_BIN_NAME=charlie
 RELEASE_ARTIFACTS=./kubernetes/kind_config.yaml
@@ -28,7 +28,7 @@ install:
 #
 # This also ensures that the charlie command is available for the version
 # command
-publish: install
+publish: install format
 ifndef NEW_VERSION
 	echo "Cannot publish, no tag provided. Set NEW_VERSION to new tag"
 else

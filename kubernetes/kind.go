@@ -6,7 +6,8 @@ import (
 
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
-	"github.com/mcdonaldseanp/charlie/remotefile"
+	"github.com/mcdonaldseanp/charlie/localfile"
+	"github.com/mcdonaldseanp/charlie/remotedata"
 	"github.com/mcdonaldseanp/charlie/validator"
 	"github.com/mcdonaldseanp/charlie/version"
 )
@@ -23,8 +24,13 @@ func (kc KindCluster) NewClusterOfType(conf_loc string, extra_flags []string) *a
 	if arr != nil {
 		return arr
 	}
+
 	if len(conf_loc) < 1 {
-		tmpfile, arr := remotefile.DownloadTemp(version.ReleaseArtifact("kind_config.yaml"))
+		data, arr := remotedata.ParsedDownload(version.ReleaseArtifact("kind_config.yaml"))
+		if arr != nil {
+			return arr
+		}
+		tmpfile, arr := localfile.TempFile("kind_config.yaml", []byte(data))
 		if arr != nil {
 			return arr
 		}

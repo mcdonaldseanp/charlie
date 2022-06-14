@@ -117,3 +117,17 @@ func OverwriteFile(location string, data []byte) *airer.Airer {
 	}
 	return nil
 }
+
+func TempFile(tmpname string, data []byte) (string, *airer.Airer) {
+	f, err := os.CreateTemp("", tmpname)
+	if err != nil {
+		return "", &airer.Airer{
+			Kind:    airer.ShellError,
+			Message: "Could not create tmp file!",
+			Origin:  err,
+		}
+	}
+	filename := f.Name()
+	OverwriteFile(filename, data)
+	return filename, nil
+}
