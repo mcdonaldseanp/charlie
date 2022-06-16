@@ -57,6 +57,9 @@ func main() {
 		false,
 		"Updates the build repo to HEAD of the main branch from upstream when set")
 
+	version_fs := flag.NewFlagSet("version", flag.ExitOnError)
+	new_version := version_fs.String("version", "", "The new version to set, should be of the form vX.X.X. Defaults to bumping the Z version one digit")
+
 	// All CLI commands should follow naming rules of powershell approved verbs:
 	// https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.2
 	//
@@ -366,14 +369,14 @@ func main() {
 			Verb: "update",
 			Noun: "version",
 			ExecutionFn: func() {
-				usage := "charlie update version [VERSION FILE] [NEW VERSION]"
+				usage := "charlie update version [VERSION FILE] [FLAGS]"
 				description := "Update charlie's version"
-				cli.ShouldHaveArgs(4, usage, description, cygnus_fs)
+				cli.ShouldHaveArgs(3, usage, description, version_fs)
 				cli.HandleCommandAirer(
-					version.UpdateVersion(os.Args[3], os.Args[4]),
+					version.UpdateVersion(os.Args[3], *new_version),
 					usage,
 					description,
-					nil,
+					version_fs,
 				)
 			},
 		},
