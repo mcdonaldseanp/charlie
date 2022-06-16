@@ -65,17 +65,29 @@ func ShouldHaveArgs(num_args int, usage string, description string, flagset *fla
 // with code 0
 func HandleCommandAirer(arr *airer.Airer, usage string, description string, flagset *flag.FlagSet) {
 	if arr != nil {
-		if arr.Kind == airer.InvalidInput {
+		switch arr.Kind {
+		case airer.InvalidInput:
 			fmt.Fprintf(os.Stderr, "%s\nUsage:\n  %s\n\nDescription:\n  %s\n\n", arr, usage, description)
 			if flagset != nil {
 				flagset.PrintDefaults()
 			}
-		} else {
+		case airer.CompletedError:
+			fmt.Printf("%s\n", arr.Message)
+			// Completed "errors" are treated as success to the tool
+			os.Exit(0)
+		default:
 			fmt.Fprintf(os.Stderr, "Error running command:\n\n%s\n", arr)
 		}
 		os.Exit(1)
 	}
 	os.Exit(0)
+}
+
+func printTopUsage(tool_name string, command_list []Command) {
+	fmt.Printf("Usage:\n  %s [COMMAND] [OBJECT] [ARGUMENTS] [FLAGS]\n\nAvailable commands:\n", tool_name)
+	for _, command := range command_list {
+		fmt.Printf("    %s %s\n", command.Verb, command.Noun)
+	}
 }
 
 func RunCommand(tool_name string, command_list []Command) {
@@ -93,17 +105,14 @@ func RunCommand(tool_name string, command_list []Command) {
 			fmt.Fprintf(os.Stdout, "%s\n", version.VERSION)
 			os.Exit(0)
 		case "-h":
-			// do nothing, it will print the usage message below
-		default:
-			// If we've arrived here, that means the args passed don't match an existing command
-			// --version or -h
-			fmt.Printf("Unknown %s command \"%s\"\n\n", tool_name, strings.Join(os.Args, " "))
+			printTopUsage(tool_name, command_list)
+			os.Exit(0)
 		}
 	}
 
-	fmt.Printf("Usage:\n  %s [COMMAND] [OBJECT] [ARGUMENTS] [FLAGS]\n\nAvailable commands:\n", tool_name)
-	for _, command := range command_list {
-		fmt.Printf("    %s %s\n", command.Verb, command.Noun)
-	}
+	// If we've arrived here, that means the args passed don't match an existing command
+	// --version or -h
+	fmt.Printf("Unknown %s command \"%s\"\n\n", tool_name, strings.Join(os.Args, " "))
+	printTopUsage(tool_name, command_list)
 	os.Exit(1)
 }

@@ -6,7 +6,6 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mcdonaldseanp/charlie/airer"
-	"github.com/mcdonaldseanp/charlie/auth"
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/validator"
 )
@@ -50,9 +49,9 @@ func SetBranch(branch_name string, clear bool, pull bool) *airer.Airer {
 		}
 	}
 	if pull {
-		_, airr := auth.TryFixAuth("git", "pull")
-		if airr != nil {
-			return airr
+		arr := localexec.ExecAsShell("git", "pull")
+		if arr != nil {
+			return arr
 		}
 	}
 	return nil

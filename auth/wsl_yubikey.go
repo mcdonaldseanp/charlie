@@ -3,6 +3,7 @@ package auth
 import (
 	"fmt"
 	"strings"
+	"time"
 
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/find"
@@ -10,74 +11,59 @@ import (
 	"github.com/mcdonaldseanp/charlie/winservice"
 )
 
-func findYubikeyBUSID() (string, *airer.Airer) {
+func yubikeyAttached(hw_id string) bool {
 	output, _, airr := localexec.ExecReadOutput("usbipd.exe", "wsl", "list")
 	if airr != nil {
-		return "", airr
+		return false
 	}
-	substr := find.LineWithSubStr(output, "Smartcard Reader")
+	substr := find.LineWithSubStr(output, hw_id)
 	if substr == "" {
-		return "", &airer.Airer{
-			Kind:    airer.ExecError,
-			Message: "Unable to find Yubikey BUSID, cannot continue",
-			Origin:  nil,
-		}
+		return false
 	}
 	// Double negative here: returns true if the line does not
 	// contain "Not attached"
 	if !strings.Contains(substr, "Not attached") {
-		return "", &airer.Airer{
+		return true
+	}
+	return false
+}
+
+func MountYubikey(hw_id string) *airer.Airer {
+	airr := winservice.StartService("usbipd")
+	if airr != nil {
+		return airr
+	}
+	if yubikeyAttached(hw_id) {
+		return &airer.Airer{
 			Kind:    airer.CompletedError,
 			Message: "Yubikey already attached",
 			Origin:  nil,
 		}
 	}
-	return strings.Split(substr, " ")[0], nil
-}
-
-func MountYubikey() *airer.Airer {
-	airr := winservice.StartService("usbipd")
+	airr = localexec.ExecAsShell("usbipd.exe", "wsl", "attach", "--hardware-id", hw_id)
 	if airr != nil {
 		return airr
 	}
-	bus_id, airr := findYubikeyBUSID()
-	if airr != nil {
-		return airr
-	}
-	airr = localexec.ExecAsShell("usbipd.exe", "wsl", "attach", "--busid", bus_id)
-	if airr != nil {
-		return airr
-	}
+	// Sleep for a couple seconds before restarting pcscd so that usbipd has
+	// a chance to load the key
+	time.Sleep(2 * time.Second)
 	return localexec.ExecAsShell("sudo", "service", "pcscd", "restart")
 }
 
-func TryFixAuth(attempt_command string, params ...string) (string, *airer.Airer) {
-	output, _, airr := localexec.ExecReadOutput(attempt_command, params...)
-	if airr != nil {
-		airr = RepairYubikey()
-		if airr != nil {
-			return "", &airer.Airer{
-				Kind:    airer.ExecError,
-				Message: fmt.Sprintf("Attempted to repair yubikey connection but failed\n%s", airr.Message),
-				Origin:  airr,
-			}
-		}
-		// Make another attempt
-		output, _, airr = localexec.ExecReadOutput(attempt_command, params...)
-		if airr != nil {
-			return "", &airer.Airer{
-				Kind:    airer.ExecError,
-				Message: fmt.Sprintf("Attempted to repair yubikey connection but failed\n%s", airr.Message),
-				Origin:  airr,
-			}
+func DismountYubikey(hw_id string) *airer.Airer {
+	if !yubikeyAttached(hw_id) {
+		return &airer.Airer{
+			Kind:    airer.CompletedError,
+			Message: "Yubikey already detached",
+			Origin:  nil,
 		}
 	}
-	return output, nil
+	return localexec.ExecAsShell("usbipd.exe", "wsl", "detach", "--hardware-id", hw_id)
 }
 
-func RepairYubikey() *airer.Airer {
+func RepairYubikey(hw_id string) *airer.Airer {
 	// Make an attempt to load the yubikey in case that's the problem
-	airr := MountYubikey()
+	airr := MountYubikey(hw_id)
 	if airr != nil {
 		if airr.Kind != airer.CompletedError {
 			// Yubikey didn't load, can't fix

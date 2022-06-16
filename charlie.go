@@ -31,6 +31,10 @@ func main() {
 	// Git commit shared flags
 	git_commit_fs := flag.NewFlagSet("git_commit", flag.ExitOnError)
 
+	// Git commit shared flags
+	yubikey_fs := flag.NewFlagSet("yubikey", flag.ExitOnError)
+	yubikey_hw_id := yubikey_fs.String("hardware-id", os.Getenv("YUBIKEY_HW_ID"), "hardware id of the yubikey to attach, in the form VID:PID")
+
 	// Kubernetes create shared flags
 	k8s_create_fs := flag.NewFlagSet("k8s_create_fs", flag.ExitOnError)
 	k8s_create_conf_loc := k8s_create_fs.String("conf-loc", "", "Location on disk where the configuration file is for the cluster create command")
@@ -126,6 +130,21 @@ func main() {
 			},
 		},
 		{
+			Verb: "dismount",
+			Noun: "yubikey",
+			ExecutionFn: func() {
+				usage := "charlie dismount yubikey"
+				description := "Detach yubikey from WSL instance"
+				cli.ShouldHaveArgs(2, usage, description, yubikey_fs)
+				cli.HandleCommandAirer(
+					auth.DismountYubikey(*yubikey_hw_id),
+					usage,
+					description,
+					yubikey_fs,
+				)
+			},
+		},
+		{
 			Verb: "get",
 			Noun: "pr",
 			ExecutionFn: func() {
@@ -177,12 +196,12 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie mount yubikey"
 				description := "Connect yubikey to WSL instance"
-				cli.ShouldHaveArgs(2, usage, description, nil)
+				cli.ShouldHaveArgs(2, usage, description, yubikey_fs)
 				cli.HandleCommandAirer(
-					auth.MountYubikey(),
+					auth.MountYubikey(*yubikey_hw_id),
 					usage,
 					description,
-					nil,
+					yubikey_fs,
 				)
 			},
 		},
@@ -273,12 +292,12 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie repair yubikey"
 				description := "attempt to repair yubikey connection to WSL instance"
-				cli.ShouldHaveArgs(2, usage, description, nil)
+				cli.ShouldHaveArgs(2, usage, description, yubikey_fs)
 				cli.HandleCommandAirer(
-					auth.RepairYubikey(),
+					auth.RepairYubikey(*yubikey_hw_id),
 					usage,
 					description,
-					nil,
+					yubikey_fs,
 				)
 			},
 		},
