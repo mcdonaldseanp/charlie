@@ -10,7 +10,7 @@ import (
 	"github.com/mcdonaldseanp/charlie/validator"
 )
 
-const VERSION string = "v0.0.10"
+const VERSION string = "v0.0.11"
 
 func readVersion(raw_bytes []byte) (string, *airer.Airer) {
 	lines := strings.Split(string(raw_bytes), "\n")
