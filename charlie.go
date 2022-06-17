@@ -66,8 +66,9 @@ func main() {
 	// Also, try to keep these in alphabetical order. The list is already long enough
 	command_list := []cli.Command{
 		{
-			Verb: "add",
-			Noun: "commit",
+			Verb:     "add",
+			Noun:     "commit",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie new commit [FLAGS]"
 				description := "Add all changes in the work tree to previous commit"
@@ -82,8 +83,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "connect",
-			Noun: "pod",
+			Verb:     "connect",
+			Noun:     "pod",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie connect pod [POD NAME] [PORT]"
 				description := "Use kubectl port-forward to open connection to a k8s pod, PORT can be omitted\n if POD NAME is a cygnus service name"
@@ -103,8 +105,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "deploy",
-			Noun: "cygnus",
+			Verb:     "deploy",
+			Noun:     "cygnus",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie deploy cygnus [FLAGS]"
 				description := "Deploy local changes of Cygnus to GKE"
@@ -118,8 +121,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "disconnect",
-			Noun: "pod",
+			Verb:     "disconnect",
+			Noun:     "pod",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie disconnect pod [POD NAME]"
 				description := "stop port fowarding from a k8s pod"
@@ -133,8 +137,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "dismount",
-			Noun: "yubikey",
+			Verb:     "dismount",
+			Noun:     "yubikey",
+			Supports: []string{"linux"},
 			ExecutionFn: func() {
 				usage := "charlie dismount yubikey"
 				description := "Detach yubikey from WSL instance"
@@ -148,8 +153,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "get",
-			Noun: "pr",
+			Verb:     "get",
+			Noun:     "pr",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				git_remote := git_branch_fs.String("remote", "upstream", "git remote to pull PR from")
 				usage := "charlie get pr [PR NUMBER] [FLAGS]"
@@ -164,8 +170,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "initialize",
-			Noun: "gcloud",
+			Verb:     "initialize",
+			Noun:     "gcloud",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie initialize gcloud"
 				description := "initialize and authorize gcloud CLI"
@@ -179,8 +186,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "install",
-			Noun: "cygnus",
+			Verb:     "install",
+			Noun:     "cygnus",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie install cygnus [FLAGS]"
 				description := "Deploy a new instance of Cygnus to GKE"
@@ -194,8 +202,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "mount",
-			Noun: "yubikey",
+			Verb:     "mount",
+			Noun:     "yubikey",
+			Supports: []string{"linux"},
 			ExecutionFn: func() {
 				usage := "charlie mount yubikey"
 				description := "Connect yubikey to WSL instance"
@@ -209,8 +218,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "new",
-			Noun: "commit",
+			Verb:     "new",
+			Noun:     "commit",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie new commit [FLAGS]"
 				description := "create new commit from all changes in the work tree"
@@ -225,8 +235,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "new",
-			Noun: "cluster",
+			Verb:     "new",
+			Noun:     "cluster",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie new cluster [TYPE] [NAME] [FLAGS]"
 				description := "Create a new kubernetes cluster of the given TYPE with name NAME. \nTYPE should be one of 'gke','kind'"
@@ -241,8 +252,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "publish",
-			Noun: "container",
+			Verb:     "publish",
+			Noun:     "container",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie publish container [CONTAINER NAME] [NEW TAG] [FLAGS]"
 				description := "publish the container that was last built locally to a container registry.\nDefaults to using DEFAULT_CONTAINER_REGISTRY env var"
@@ -256,8 +268,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "read",
-			Noun: "kotsip",
+			Verb:     "read",
+			Noun:     "kotsip",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie read kotsip"
 				description := "Read the ip that KOTS_IP should be set to"
@@ -275,8 +288,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "remove",
-			Noun: "cluster",
+			Verb:     "remove",
+			Noun:     "cluster",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie remove cluster [NAME]"
 				description := "Remove GKE cluster. Defaults to removing cluster with name from MY_CLUSTER \nenv var"
@@ -290,8 +304,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "repair",
-			Noun: "yubikey",
+			Verb:     "repair",
+			Noun:     "yubikey",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie repair yubikey"
 				description := "attempt to repair yubikey connection to WSL instance"
@@ -305,8 +320,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "resize",
-			Noun: "cluster",
+			Verb:     "resize",
+			Noun:     "cluster",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie resize cluster [NAME] [SIZE]"
 				description := "resize Kubernetes cluster NAME to given SIZE"
@@ -320,8 +336,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "set",
-			Noun: "branch",
+			Verb:     "set",
+			Noun:     "branch",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				pull_branch := git_branch_fs.Bool("pull", false, "pull from upstream")
 				usage := "charlie set branch [BRANCH NAME] [FLAGS]"
@@ -336,8 +353,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "start",
-			Noun: "docker",
+			Verb:     "start",
+			Noun:     "docker",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie start docker"
 				description := "start the docker service on localhost"
@@ -351,8 +369,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "uninstall",
-			Noun: "cygnus",
+			Verb:     "uninstall",
+			Noun:     "cygnus",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie uninstall cygnus [FLAGS]"
 				description := "Run destroy-application to tear down an existing cygnus instance"
@@ -366,8 +385,9 @@ func main() {
 			},
 		},
 		{
-			Verb: "update",
-			Noun: "version",
+			Verb:     "update",
+			Noun:     "version",
+			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
 				usage := "charlie update version [VERSION FILE] [FLAGS]"
 				description := "Update charlie's version"

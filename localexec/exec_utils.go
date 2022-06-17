@@ -5,15 +5,28 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
+	"runtime"
+	"strings"
 
 	"github.com/mcdonaldseanp/charlie/airer"
-	"github.com/mcdonaldseanp/charlie/localfile"
+	"github.com/mcdonaldseanp/charlie/sanitize"
 )
 
 // ExecAsShell always writes everything to stderr so that
 // any resulting functionality can return something useful
 // to the CLI
 func ExecAsShell(command_string string, args ...string) *airer.Airer {
+	if runtime.GOOS == "linux" && isWinPath(command_string) {
+		new_command, arr := findWSLPath(command_string)
+		if arr != nil {
+			return &airer.Airer{
+				Kind:    airer.ExecError,
+				Message: fmt.Sprintf("Could not convert windows path to wsl path: %s", arr),
+				Origin:  arr,
+			}
+		}
+		command_string = sanitize.ReplaceAllNewlines(new_command)
+	}
 	shell_command := exec.Command(command_string, args...)
 	shell_command.Env = os.Environ()
 	shell_command.Stdout = os.Stderr
@@ -31,6 +44,17 @@ func ExecAsShell(command_string string, args ...string) *airer.Airer {
 }
 
 func ExecDetached(command_string string, args ...string) (*exec.Cmd, *airer.Airer) {
+	if runtime.GOOS == "linux" && isWinPath(command_string) {
+		new_command, arr := findWSLPath(command_string)
+		if arr != nil {
+			return nil, &airer.Airer{
+				Kind:    airer.ExecError,
+				Message: fmt.Sprintf("Could not convert windows path to wsl path: %s", arr),
+				Origin:  arr,
+			}
+		}
+		command_string = sanitize.ReplaceAllNewlines(new_command)
+	}
 	shell_command := exec.Command(command_string, args...)
 	shell_command.Env = os.Environ()
 	err := shell_command.Start()
@@ -44,8 +68,19 @@ func ExecDetached(command_string string, args ...string) (*exec.Cmd, *airer.Aire
 	return shell_command, nil
 }
 
-func ExecReadOutput(executable string, args ...string) (string, string, *airer.Airer) {
-	shell_command := exec.Command(executable, args...)
+func ExecReadOutput(command_string string, args ...string) (string, string, *airer.Airer) {
+	if runtime.GOOS == "linux" && isWinPath(command_string) {
+		new_command, arr := findWSLPath(command_string)
+		if arr != nil {
+			return "", "", &airer.Airer{
+				Kind:    airer.ExecError,
+				Message: fmt.Sprintf("Could not convert windows path to wsl path: %s", arr),
+				Origin:  arr,
+			}
+		}
+		command_string = sanitize.ReplaceAllNewlines(new_command)
+	}
+	shell_command := exec.Command(command_string, args...)
 	shell_command.Env = os.Environ()
 	var stdout, stderr bytes.Buffer
 	shell_command.Stdout = &stdout
@@ -63,36 +98,14 @@ func ExecReadOutput(executable string, args ...string) (string, string, *airer.A
 	return output, logs, nil
 }
 
-func ExecScriptReadOutput(executable string, script string, args []string) (string, string, *airer.Airer) {
-	f, err := os.CreateTemp("", "regulator_script")
-	if err != nil {
-		return "", "", &airer.Airer{
-			Kind:    airer.ShellError,
-			Message: "Could not create tmp file!",
-			Origin:  err,
-		}
+func findWSLPath(command_string string) (string, *airer.Airer) {
+	wsl_path, _, arr := ExecReadOutput("wslpath", "-u", command_string)
+	if arr != nil {
+		return "", arr
 	}
-	filename := f.Name()
-	defer os.Remove(filename) // clean up
-	localfile.OverwriteFile(filename, []byte(script))
-	final_args := append([]string{filename}, args...)
-	return ExecReadOutput(executable, final_args...)
+	return wsl_path, nil
 }
 
-func BuildAndRunCommand(executable string, file string, script string, args []string) (string, string, *airer.Airer) {
-	var output, logs string
-	var arr *airer.Airer
-	if len(file) > 0 {
-		final_args := append([]string{file}, args...)
-		output, logs, arr = ExecReadOutput(executable, final_args...)
-	} else if len(script) > 0 {
-		output, logs, arr = ExecScriptReadOutput(executable, script, args)
-	} else {
-		output, logs, arr = ExecReadOutput(executable, args...)
-	}
-	if arr != nil {
-		return output, logs, arr
-	}
-
-	return output, logs, nil
+func isWinPath(command_string string) bool {
+	return strings.HasPrefix(command_string, "C:\\") || strings.HasPrefix(command_string, "C:/")
 }

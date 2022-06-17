@@ -4,6 +4,7 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime"
 	"strings"
 
 	"github.com/mcdonaldseanp/charlie/airer"
@@ -13,6 +14,7 @@ import (
 type Command struct {
 	Verb        string
 	Noun        string
+	Supports    []string
 	ExecutionFn func()
 }
 
@@ -83,17 +85,28 @@ func HandleCommandAirer(arr *airer.Airer, usage string, description string, flag
 	os.Exit(0)
 }
 
+func osSupportsCommand(cmd Command) bool {
+	for _, os_name := range cmd.Supports {
+		if runtime.GOOS == os_name {
+			return true
+		}
+	}
+	return false
+}
+
 func printTopUsage(tool_name string, command_list []Command) {
 	fmt.Printf("Usage:\n  %s [COMMAND] [OBJECT] [ARGUMENTS] [FLAGS]\n\nAvailable commands:\n", tool_name)
 	for _, command := range command_list {
-		fmt.Printf("    %s %s\n", command.Verb, command.Noun)
+		if osSupportsCommand(command) {
+			fmt.Printf("    %s %s\n", command.Verb, command.Noun)
+		}
 	}
 }
 
 func RunCommand(tool_name string, command_list []Command) {
 	if len(os.Args) > 2 {
 		for _, command := range command_list {
-			if os.Args[1] == command.Verb && os.Args[2] == command.Noun {
+			if os.Args[1] == command.Verb && os.Args[2] == command.Noun && osSupportsCommand(command) {
 				command.ExecutionFn()
 			}
 		}
