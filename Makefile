@@ -32,11 +32,10 @@ install:
 # If NEW_VERSION is set by the user, it will set the new charlie version
 # to that value. Otherwise charlie will bump the Z version
 publish: install format
-publish: NEW_VERSION:=$(shell charlie update version ./version/version.go --version="$(NEW_VERSION)")
-publish:
-	@echo "Tagging and publishing new version $(NEW_VERSION)"
-	charlie new commit --message "(release) Update to new version $(NEW_VERSION)"
-	git tag -a $(NEW_VERSION) -m "Version $(NEW_VERSION)";
+	NEW_VERSION=$$(charlie update version ./version/version.go --version="$(NEW_VERSION)") && \
+	echo "Tagging and publishing new version $$NEW_VERSION" && \
+	charlie new commit --message "(release) Update to new version $$NEW_VERSION" && \
+	git tag -a $$NEW_VERSION -m "Version $$NEW_VERSION"
 	git push
 	git push --tags
 
