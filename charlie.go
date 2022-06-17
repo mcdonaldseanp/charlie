@@ -2,14 +2,12 @@ package main
 
 import (
 	"flag"
-	"fmt"
 	"os"
 	"strings"
 
 	"github.com/mcdonaldseanp/charlie/auth"
 	"github.com/mcdonaldseanp/charlie/cli"
 	"github.com/mcdonaldseanp/charlie/container"
-	"github.com/mcdonaldseanp/charlie/cygnus"
 	"github.com/mcdonaldseanp/charlie/githelpers"
 	"github.com/mcdonaldseanp/charlie/kubernetes"
 	"github.com/mcdonaldseanp/charlie/version"
@@ -45,17 +43,6 @@ func main() {
 	container_registry := con_fs.String("registry",
 		os.Getenv("DEFAULT_CONTAINER_REGISTRY"),
 		"set the container registry")
-
-	cygnus_fs := flag.NewFlagSet("cygnus", flag.ExitOnError)
-	cy_cluster_name := cygnus_fs.String("cluster-name",
-		os.Getenv("MY_CLUSTER"),
-		"Execute against a specific cluster")
-	build_repo_loc := cygnus_fs.String("build-repo",
-		os.Getenv("CYGNUS_BUILD_REPO_DIR"),
-		"Location on disk of the repo where cygnus builds from")
-	pull_latest := cygnus_fs.Bool("pull-latest",
-		false,
-		"Updates the build repo to HEAD of the main branch from upstream when set")
 
 	version_fs := flag.NewFlagSet("version", flag.ExitOnError)
 	new_version := version_fs.String("version", "", "The new version to set, should be of the form vX.X.X. Defaults to bumping the Z version one digit")
@@ -101,22 +88,6 @@ func main() {
 					usage,
 					description,
 					nil,
-				)
-			},
-		},
-		{
-			Verb:     "deploy",
-			Noun:     "cygnus",
-			Supports: []string{"linux", "windows"},
-			ExecutionFn: func() {
-				usage := "charlie deploy cygnus [FLAGS]"
-				description := "Deploy local changes of Cygnus to GKE"
-				cli.ShouldHaveArgs(2, usage, description, cygnus_fs)
-				cli.HandleCommandAirer(
-					cygnus.DeployCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
-					usage,
-					description,
-					cygnus_fs,
 				)
 			},
 		},
@@ -186,22 +157,6 @@ func main() {
 			},
 		},
 		{
-			Verb:     "install",
-			Noun:     "cygnus",
-			Supports: []string{"linux", "windows"},
-			ExecutionFn: func() {
-				usage := "charlie install cygnus [FLAGS]"
-				description := "Deploy a new instance of Cygnus to GKE"
-				cli.ShouldHaveArgs(2, usage, description, cygnus_fs)
-				cli.HandleCommandAirer(
-					cygnus.InstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
-					usage,
-					description,
-					cygnus_fs,
-				)
-			},
-		},
-		{
 			Verb:     "mount",
 			Noun:     "yubikey",
 			Supports: []string{"linux"},
@@ -264,26 +219,6 @@ func main() {
 					usage,
 					description,
 					con_fs,
-				)
-			},
-		},
-		{
-			Verb:     "read",
-			Noun:     "kotsip",
-			Supports: []string{"linux", "windows"},
-			ExecutionFn: func() {
-				usage := "charlie read kotsip"
-				description := "Read the ip that KOTS_IP should be set to"
-				cli.ShouldHaveArgs(2, usage, description, nil)
-				output, airr := cygnus.ReadKOTSIP()
-				if airr == nil {
-					fmt.Printf("%s", output)
-				}
-				cli.HandleCommandAirer(
-					airr,
-					usage,
-					description,
-					nil,
 				)
 			},
 		},
@@ -365,22 +300,6 @@ func main() {
 					usage,
 					description,
 					nil,
-				)
-			},
-		},
-		{
-			Verb:     "uninstall",
-			Noun:     "cygnus",
-			Supports: []string{"linux", "windows"},
-			ExecutionFn: func() {
-				usage := "charlie uninstall cygnus [FLAGS]"
-				description := "Run destroy-application to tear down an existing cygnus instance"
-				cli.ShouldHaveArgs(2, usage, description, cygnus_fs)
-				cli.HandleCommandAirer(
-					cygnus.UninstallCygnus(*cy_cluster_name, *build_repo_loc, *pull_latest),
-					usage,
-					description,
-					cygnus_fs,
 				)
 			},
 		},
