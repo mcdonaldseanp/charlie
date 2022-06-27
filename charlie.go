@@ -6,11 +6,11 @@ import (
 	"strings"
 
 	"github.com/mcdonaldseanp/charlie/auth"
-	"github.com/mcdonaldseanp/charlie/cli"
 	"github.com/mcdonaldseanp/charlie/container"
 	"github.com/mcdonaldseanp/charlie/githelpers"
 	"github.com/mcdonaldseanp/charlie/kubernetes"
 	"github.com/mcdonaldseanp/charlie/version"
+	"github.com/mcdonaldseanp/clibuild/cli"
 )
 
 func main() {
@@ -43,9 +43,6 @@ func main() {
 	container_registry := con_fs.String("registry",
 		os.Getenv("DEFAULT_CONTAINER_REGISTRY"),
 		"set the container registry")
-
-	version_fs := flag.NewFlagSet("version", flag.ExitOnError)
-	new_version := version_fs.String("version", "", "The new version to set, should be of the form vX.X.X. Defaults to bumping the Z version one digit")
 
 	// All CLI commands should follow naming rules of powershell approved verbs:
 	// https://docs.microsoft.com/en-us/powershell/scripting/developer/cmdlet/approved-verbs-for-windows-powershell-commands?view=powershell-7.2
@@ -303,23 +300,7 @@ func main() {
 				)
 			},
 		},
-		{
-			Verb:     "update",
-			Noun:     "version",
-			Supports: []string{"linux", "windows"},
-			ExecutionFn: func() {
-				usage := "charlie update version [VERSION FILE] [FLAGS]"
-				description := "Update charlie's version"
-				cli.ShouldHaveArgs(3, usage, description, version_fs)
-				cli.HandleCommandAirer(
-					version.UpdateVersion(os.Args[3], *new_version),
-					usage,
-					description,
-					version_fs,
-				)
-			},
-		},
 	}
 
-	cli.RunCommand("charlie", command_list)
+	cli.RunCommand("charlie", version.VERSION, command_list)
 }

@@ -8,7 +8,7 @@ import (
 	"strings"
 
 	"github.com/mcdonaldseanp/charlie/airer"
-	"github.com/mcdonaldseanp/charlie/validator"
+	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
 const STDIN_IDENTIFIER string = "__STDIN__"

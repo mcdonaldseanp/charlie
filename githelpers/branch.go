@@ -7,7 +7,7 @@ import (
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
-	"github.com/mcdonaldseanp/charlie/validator"
+	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
 func SetBranch(branch_name string, clear bool, pull bool) *airer.Airer {

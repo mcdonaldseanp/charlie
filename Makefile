@@ -34,7 +34,8 @@ install:
 publish: install format
 	NEW_VERSION=$$(charlie update version ./version/version.go --version="$(NEW_VERSION)") && \
 	echo "Tagging and publishing new version $$NEW_VERSION" && \
-	charlie new commit --message "(release) Update to new version $$NEW_VERSION" && \
+	git add --all && \
+	git commit -m "(release) Update to new version $$NEW_VERSION" && \
 	git tag -a $$NEW_VERSION -m "Version $$NEW_VERSION"
 	git push
 	git push --tags

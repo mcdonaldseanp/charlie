@@ -8,8 +8,8 @@ import (
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/localfile"
 	"github.com/mcdonaldseanp/charlie/remotedata"
-	"github.com/mcdonaldseanp/charlie/validator"
 	"github.com/mcdonaldseanp/charlie/version"
+	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
 type KindCluster string

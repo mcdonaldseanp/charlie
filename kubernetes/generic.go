@@ -8,7 +8,7 @@ import (
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/localfile"
-	"github.com/mcdonaldseanp/charlie/validator"
+	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
 type KubernetesClusterType interface {
