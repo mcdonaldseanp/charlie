@@ -11,7 +11,7 @@ import (
 	"github.com/mcdonaldseanp/charlie/airer"
 )
 
-func OpenRepo() (*git.Repository, *airer.Airer) {
+func OpenRepo() (*git.Repository, error) {
 	pwd, err := os.Getwd()
 	if err != nil {
 		return nil, &airer.Airer{
@@ -31,7 +31,7 @@ func OpenRepo() (*git.Repository, *airer.Airer) {
 	return repo, nil
 }
 
-func OpenWorktree() (*git.Worktree, *airer.Airer) {
+func OpenWorktree() (*git.Worktree, error) {
 	repo, airr := OpenRepo()
 	if airr != nil {
 		return nil, airr
@@ -59,7 +59,7 @@ func OpenWorktree() (*git.Worktree, *airer.Airer) {
 	return wt, nil
 }
 
-func WorkTreeClean(wt *git.Worktree) (bool, *airer.Airer) {
+func WorkTreeClean(wt *git.Worktree) (bool, error) {
 	status, err := wt.Status()
 	if err != nil {
 		return false, &airer.Airer{

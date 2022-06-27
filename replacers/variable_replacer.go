@@ -20,7 +20,7 @@ func strippedVar(raw_str []byte) string {
 	return str
 }
 
-func ReplaceVarsWithEnv(input []byte) (string, *airer.Airer) {
+func ReplaceVarsWithEnv(input []byte) (string, error) {
 	var result string = string(input)
 	var vars_seen []string = make([]string, 0)
 	var missing_os_vars []string = make([]string, 0)

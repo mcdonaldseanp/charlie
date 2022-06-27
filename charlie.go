@@ -54,11 +54,11 @@ func main() {
 			Noun:     "commit",
 			Supports: []string{"linux", "windows"},
 			ExecutionFn: func() {
-				usage := "charlie new commit [FLAGS]"
+				usage := "charlie add commit [FLAGS]"
 				description := "Add all changes in the work tree to previous commit"
 				no_edit := git_commit_fs.Bool("no-edit", false, "Commit all changes without changing commit message")
-				cli.ShouldHaveArgs(2, usage, description, git_commit_fs)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(0, usage, description, git_commit_fs)
+				cli.HandleCommandError(
 					githelpers.AddCommit(*no_edit),
 					usage,
 					description,
@@ -75,12 +75,12 @@ func main() {
 				description := "Use kubectl port-forward to open connection to a k8s pod, PORT can be omitted\n if POD NAME is a cygnus service name"
 				// If this ever gets passed a flagset, the if statement below
 				// needs to check if os.Args[4] is expected to be a flag or not
-				cli.ShouldHaveArgs(3, usage, description, nil)
+				cli.ShouldHaveArgs(1, usage, description, nil)
 				port_num := ""
 				if len(os.Args) >= 5 {
 					port_num = os.Args[4]
 				}
-				cli.HandleCommandAirer(
+				cli.HandleCommandError(
 					kubernetes.ConnectPod(os.Args[3], port_num),
 					usage,
 					description,
@@ -95,8 +95,8 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie disconnect pod [POD NAME]"
 				description := "stop port fowarding from a k8s pod"
-				cli.ShouldHaveArgs(3, usage, description, nil)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(1, usage, description, nil)
+				cli.HandleCommandError(
 					kubernetes.DisconnectPod(os.Args[3]),
 					usage,
 					description,
@@ -111,8 +111,8 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie dismount yubikey"
 				description := "Detach yubikey from WSL instance"
-				cli.ShouldHaveArgs(2, usage, description, yubikey_fs)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(0, usage, description, yubikey_fs)
+				cli.HandleCommandError(
 					auth.DismountYubikey(*yubikey_hw_id),
 					usage,
 					description,
@@ -128,8 +128,8 @@ func main() {
 				git_remote := git_branch_fs.String("remote", "upstream", "git remote to pull PR from")
 				usage := "charlie get pr [PR NUMBER] [FLAGS]"
 				description := "Check out contents of a PR from github"
-				cli.ShouldHaveArgs(3, usage, description, git_branch_fs)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(1, usage, description, git_branch_fs)
+				cli.HandleCommandError(
 					githelpers.GetPR(os.Args[3], *clear_branch, *git_remote),
 					usage,
 					description,
@@ -144,8 +144,8 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie initialize gcloud"
 				description := "initialize and authorize gcloud CLI"
-				cli.ShouldHaveArgs(2, usage, description, nil)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(0, usage, description, nil)
+				cli.HandleCommandError(
 					kubernetes.InitializeGcloud(),
 					usage,
 					description,
@@ -160,8 +160,8 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie mount yubikey"
 				description := "Connect yubikey to WSL instance"
-				cli.ShouldHaveArgs(2, usage, description, yubikey_fs)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(0, usage, description, yubikey_fs)
+				cli.HandleCommandError(
 					auth.MountYubikey(*yubikey_hw_id),
 					usage,
 					description,
@@ -177,8 +177,8 @@ func main() {
 				usage := "charlie new commit [FLAGS]"
 				description := "create new commit from all changes in the work tree"
 				message := git_commit_fs.String("message", "", "Provide the commit message")
-				cli.ShouldHaveArgs(2, usage, description, git_commit_fs)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(0, usage, description, git_commit_fs)
+				cli.HandleCommandError(
 					githelpers.NewCommit(*message),
 					usage,
 					description,
@@ -193,9 +193,9 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie new cluster [TYPE] [NAME] [FLAGS]"
 				description := "Create a new kubernetes cluster of the given TYPE with name NAME. \nTYPE should be one of 'gke','kind'"
-				cli.ShouldHaveArgs(4, usage, description, k8s_create_fs)
+				cli.ShouldHaveArgs(2, usage, description, k8s_create_fs)
 				extra_flags := strings.Split(*k8s_create_extra_flags, ",")
-				cli.HandleCommandAirer(
+				cli.HandleCommandError(
 					kubernetes.NewCluster(os.Args[3], os.Args[4], *k8s_create_conf_loc, extra_flags),
 					usage,
 					description,
@@ -210,8 +210,8 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie publish container [CONTAINER NAME] [NEW TAG] [FLAGS]"
 				description := "publish the container that was last built locally to a container registry.\nDefaults to using DEFAULT_CONTAINER_REGISTRY env var"
-				cli.ShouldHaveArgs(4, usage, description, con_fs)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(2, usage, description, con_fs)
+				cli.HandleCommandError(
 					container.PublishContainer(os.Args[3], os.Args[4], *container_registry),
 					usage,
 					description,
@@ -226,28 +226,12 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie remove cluster [NAME]"
 				description := "Remove GKE cluster. Defaults to removing cluster with name from MY_CLUSTER \nenv var"
-				cli.ShouldHaveArgs(3, usage, description, nil)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(1, usage, description, nil)
+				cli.HandleCommandError(
 					kubernetes.RemoveCluster(os.Args[3]),
 					usage,
 					description,
 					nil,
-				)
-			},
-		},
-		{
-			Verb:     "repair",
-			Noun:     "yubikey",
-			Supports: []string{"linux", "windows"},
-			ExecutionFn: func() {
-				usage := "charlie repair yubikey"
-				description := "attempt to repair yubikey connection to WSL instance"
-				cli.ShouldHaveArgs(2, usage, description, yubikey_fs)
-				cli.HandleCommandAirer(
-					auth.RepairYubikey(*yubikey_hw_id),
-					usage,
-					description,
-					yubikey_fs,
 				)
 			},
 		},
@@ -258,8 +242,8 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie resize cluster [NAME] [SIZE]"
 				description := "resize Kubernetes cluster NAME to given SIZE"
-				cli.ShouldHaveArgs(3, usage, description, nil)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(1, usage, description, nil)
+				cli.HandleCommandError(
 					kubernetes.ResizeCluster(os.Args[3], os.Args[4]),
 					usage,
 					description,
@@ -275,8 +259,8 @@ func main() {
 				pull_branch := git_branch_fs.Bool("pull", false, "pull from upstream")
 				usage := "charlie set branch [BRANCH NAME] [FLAGS]"
 				description := "set git repo to new branch"
-				cli.ShouldHaveArgs(3, usage, description, git_branch_fs)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(1, usage, description, git_branch_fs)
+				cli.HandleCommandError(
 					githelpers.SetBranch(os.Args[3], *clear_branch, *pull_branch),
 					usage,
 					description,
@@ -291,8 +275,8 @@ func main() {
 			ExecutionFn: func() {
 				usage := "charlie start docker"
 				description := "start the docker service on localhost"
-				cli.ShouldHaveArgs(2, usage, description, nil)
-				cli.HandleCommandAirer(
+				cli.ShouldHaveArgs(0, usage, description, nil)
+				cli.HandleCommandError(
 					container.StartDocker(),
 					usage,
 					description,

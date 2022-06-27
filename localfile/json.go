@@ -8,7 +8,7 @@ import (
 	"github.com/mcdonaldseanp/charlie/airer"
 )
 
-func ReadJSONFile(location string, data interface{}) *airer.Airer {
+func ReadJSONFile(location string, data interface{}) error {
 	json_blob, airr := ReadFileInChunks(location)
 	if airr != nil {
 		return airr
@@ -18,7 +18,7 @@ func ReadJSONFile(location string, data interface{}) *airer.Airer {
 	return nil
 }
 
-func OverwriteJSONFile(location string, data interface{}) *airer.Airer {
+func OverwriteJSONFile(location string, data interface{}) error {
 	f, err := os.OpenFile(location, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		return &airer.Airer{

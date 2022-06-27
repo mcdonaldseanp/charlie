@@ -3,14 +3,13 @@ package kubernetes
 import (
 	"fmt"
 
-	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
 type GKECluster string
 
-func InitializeGcloud() *airer.Airer {
+func InitializeGcloud() error {
 	airr := localexec.ExecAsShell("gcloud", "auth", "login", "--no-launch-browser")
 	if airr != nil {
 		return airr
@@ -19,8 +18,8 @@ func InitializeGcloud() *airer.Airer {
 	return airr
 }
 
-func ResizeCluster(cluster_name string, num_nodes string) *airer.Airer {
-	arr := validator.ValidateParams(fmt.Sprintf(
+func ResizeCluster(cluster_name string, num_nodes string) error {
+	err := validator.ValidateParams(fmt.Sprintf(
 		`[
 			{"name":"cluster_name","value":"%s","validate":["NotEmpty"]},
 			{"name":"num_nodes","value":"%s","validate":["NotEmpty", "IsNumber"]}
@@ -28,22 +27,22 @@ func ResizeCluster(cluster_name string, num_nodes string) *airer.Airer {
 		cluster_name,
 		num_nodes,
 	))
-	if arr != nil {
-		return arr
+	if err != nil {
+		return err
 	}
 	return localexec.ExecAsShell("gcloud", "container", "clusters", "resize", cluster_name, "--num-nodes", num_nodes)
 }
 
-func (gkec GKECluster) NewClusterOfType(conf_loc string, extra_flags []string) *airer.Airer {
+func (gkec GKECluster) NewClusterOfType(conf_loc string, extra_flags []string) error {
 	// Only cluster_name is required, so that's the only thing to validate
-	arr := validator.ValidateParams(fmt.Sprintf(
+	err := validator.ValidateParams(fmt.Sprintf(
 		`[
 			{"name":"cluster_name","value":"%s","validate":["NotEmpty"]}
 		]`,
 		string(gkec),
 	))
-	if arr != nil {
-		return arr
+	if err != nil {
+		return err
 	}
 	return localexec.ExecAsShell(
 		"gcloud",
@@ -65,13 +64,13 @@ func (gkec GKECluster) NewClusterOfType(conf_loc string, extra_flags []string) *
 	)
 }
 
-func (gkec GKECluster) RemoveClusterOfType() *airer.Airer {
-	arr := validator.ValidateParams(fmt.Sprintf(
+func (gkec GKECluster) RemoveClusterOfType() error {
+	err := validator.ValidateParams(fmt.Sprintf(
 		`[{"name":"cluster_name","value":"%s","validate":["NotEmpty"]}]`,
 		string(gkec),
 	))
-	if arr != nil {
-		return arr
+	if err != nil {
+		return err
 	}
 	return localexec.ExecAsShell("gcloud", "container", "clusters", "delete", string(gkec))
 }

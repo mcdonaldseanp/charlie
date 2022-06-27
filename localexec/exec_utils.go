@@ -15,7 +15,7 @@ import (
 // ExecAsShell always writes everything to stderr so that
 // any resulting functionality can return something useful
 // to the CLI
-func ExecAsShell(command_string string, args ...string) *airer.Airer {
+func ExecAsShell(command_string string, args ...string) error {
 	if runtime.GOOS == "linux" && isWinPath(command_string) {
 		new_command, arr := findWSLPath(command_string)
 		if arr != nil {
@@ -43,7 +43,7 @@ func ExecAsShell(command_string string, args ...string) *airer.Airer {
 	return nil
 }
 
-func ExecDetached(command_string string, args ...string) (*exec.Cmd, *airer.Airer) {
+func ExecDetached(command_string string, args ...string) (*exec.Cmd, error) {
 	if runtime.GOOS == "linux" && isWinPath(command_string) {
 		new_command, arr := findWSLPath(command_string)
 		if arr != nil {
@@ -68,7 +68,7 @@ func ExecDetached(command_string string, args ...string) (*exec.Cmd, *airer.Aire
 	return shell_command, nil
 }
 
-func ExecReadOutput(command_string string, args ...string) (string, string, *airer.Airer) {
+func ExecReadOutput(command_string string, args ...string) (string, string, error) {
 	if runtime.GOOS == "linux" && isWinPath(command_string) {
 		new_command, arr := findWSLPath(command_string)
 		if arr != nil {
@@ -98,7 +98,7 @@ func ExecReadOutput(command_string string, args ...string) (string, string, *air
 	return output, logs, nil
 }
 
-func findWSLPath(command_string string) (string, *airer.Airer) {
+func findWSLPath(command_string string) (string, error) {
 	wsl_path, _, arr := ExecReadOutput("wslpath", "-u", command_string)
 	if arr != nil {
 		return "", arr

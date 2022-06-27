@@ -8,7 +8,6 @@ import (
 	"strings"
 
 	"github.com/mcdonaldseanp/charlie/airer"
-	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
 const STDIN_IDENTIFIER string = "__STDIN__"
@@ -22,36 +21,9 @@ func readFromStdin() string {
 	return builder.String()
 }
 
-func ChooseFileOrStdin(specfile string, use_stdin bool) (string, *airer.Airer) {
-	if use_stdin {
-		if len(specfile) > 0 {
-			return "", &airer.Airer{
-				Kind:    airer.InvalidInput,
-				Message: "Cannot specify both a file and to use stdin",
-				Origin:  nil,
-			}
-		}
-		return STDIN_IDENTIFIER, nil
-	} else {
-		// Validate that the thing is actually a file on disk before
-		// going any further
-		//
-		// Cheat a little with the validator: this function is mostly used
-		// for the CLI commands, so use a name that shows it's the flag
-		arr := validator.ValidateParams(fmt.Sprintf(
-			`[{"name":"--file","value":"%s","validate":["NotEmpty","IsFile"]}]`,
-			specfile,
-		))
-		if arr != nil {
-			return "", arr
-		}
-		return specfile, nil
-	}
-}
-
-func ReadFileOrStdin(maybe_file string) ([]byte, *airer.Airer) {
+func ReadFileOrStdin(maybe_file string) ([]byte, error) {
 	var raw_data []byte
-	var arr *airer.Airer
+	var arr error
 	if maybe_file == STDIN_IDENTIFIER {
 		raw_data = []byte(readFromStdin())
 	} else {
@@ -63,7 +35,7 @@ func ReadFileOrStdin(maybe_file string) ([]byte, *airer.Airer) {
 	return raw_data, nil
 }
 
-func ReadFileInChunks(location string) ([]byte, *airer.Airer) {
+func ReadFileInChunks(location string) ([]byte, error) {
 	f, err := os.OpenFile(location, os.O_RDWR|os.O_CREATE, 0755)
 	if err != nil {
 		return nil, &airer.Airer{
@@ -97,7 +69,7 @@ func ReadFileInChunks(location string) ([]byte, *airer.Airer) {
 	return file_contents, nil
 }
 
-func OverwriteFile(location string, data []byte) *airer.Airer {
+func OverwriteFile(location string, data []byte) error {
 	f, err := os.OpenFile(location, os.O_RDWR|os.O_CREATE|os.O_TRUNC, 0755)
 	if err != nil {
 		return &airer.Airer{
@@ -118,7 +90,7 @@ func OverwriteFile(location string, data []byte) *airer.Airer {
 	return nil
 }
 
-func TempFile(tmpname string, data []byte) (string, *airer.Airer) {
+func TempFile(tmpname string, data []byte) (string, error) {
 	f, err := os.CreateTemp("", tmpname)
 	if err != nil {
 		return "", &airer.Airer{

@@ -10,7 +10,7 @@ import (
 	"github.com/mcdonaldseanp/charlie/replacers"
 )
 
-func readBody(resp http.Response) ([]byte, *airer.Airer) {
+func readBody(resp http.Response) ([]byte, error) {
 	// Create a buffer, read 32 bytes at a time
 	byte_buffer := make([]byte, 32)
 	file_contents := make([]byte, 0)
@@ -34,7 +34,7 @@ func readBody(resp http.Response) ([]byte, *airer.Airer) {
 	return file_contents, nil
 }
 
-func Download(url string) ([]byte, *airer.Airer) {
+func Download(url string) ([]byte, error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Fatal(err)
@@ -47,7 +47,7 @@ func Download(url string) ([]byte, *airer.Airer) {
 	return data, nil
 }
 
-func ParsedDownload(url string) (string, *airer.Airer) {
+func ParsedDownload(url string) (string, error) {
 	data, arr := Download(url)
 	if arr != nil {
 		return "", arr

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"fmt"
 	"strings"
 	"time"
 
@@ -28,7 +27,7 @@ func yubikeyAttached(hw_id string) bool {
 	return false
 }
 
-func MountYubikey(hw_id string) *airer.Airer {
+func MountYubikey(hw_id string) error {
 	airr := winservice.StartService("usbipd")
 	if airr != nil {
 		return airr
@@ -50,7 +49,7 @@ func MountYubikey(hw_id string) *airer.Airer {
 	return localexec.ExecAsShell("sudo", "service", "pcscd", "restart")
 }
 
-func DismountYubikey(hw_id string) *airer.Airer {
+func DismountYubikey(hw_id string) error {
 	if !yubikeyAttached(hw_id) {
 		return &airer.Airer{
 			Kind:    airer.CompletedError,
@@ -59,31 +58,4 @@ func DismountYubikey(hw_id string) *airer.Airer {
 		}
 	}
 	return localexec.ExecAsShell("usbipd.exe", "wsl", "detach", "--hardware-id", hw_id)
-}
-
-func RepairYubikey(hw_id string) *airer.Airer {
-	// Make an attempt to load the yubikey in case that's the problem
-	airr := MountYubikey(hw_id)
-	if airr != nil {
-		if airr.Kind != airer.CompletedError {
-			// Yubikey didn't load, can't fix
-			return &airer.Airer{
-				Kind:    airer.ExecError,
-				Message: fmt.Sprintf("Yubikey could not be mounted:\n%s", airr.Message),
-				Origin:  airr,
-			}
-		}
-		// If it was already connected, we can continue
-	}
-	// Also try to unfuck gpg
-	_, _, airr = localexec.ExecReadOutput("gpg-connect-agent", "updatestartuptty", "/bye")
-	if airr != nil {
-		// Definately fucked
-		return &airer.Airer{
-			Kind:    airer.ExecError,
-			Message: fmt.Sprintf("Attempt to repair GPG failed:\n%s", airr.Message),
-			Origin:  airr,
-		}
-	}
-	return nil
 }

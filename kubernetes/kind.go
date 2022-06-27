@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/localfile"
 	"github.com/mcdonaldseanp/charlie/remotedata"
@@ -14,15 +13,15 @@ import (
 
 type KindCluster string
 
-func (kc KindCluster) NewClusterOfType(conf_loc string, extra_flags []string) *airer.Airer {
-	arr := validator.ValidateParams(fmt.Sprintf(
+func (kc KindCluster) NewClusterOfType(conf_loc string, extra_flags []string) error {
+	err := validator.ValidateParams(fmt.Sprintf(
 		`[
 			{"name":"cluster_name","value":"%s","validate":["NotEmpty"]}
 		]`,
 		string(kc),
 	))
-	if arr != nil {
-		return arr
+	if err != nil {
+		return err
 	}
 
 	if len(conf_loc) < 1 {
@@ -40,6 +39,6 @@ func (kc KindCluster) NewClusterOfType(conf_loc string, extra_flags []string) *a
 	return localexec.ExecAsShell("kind", "create", "cluster", "--config", conf_loc, "--name", string(kc))
 }
 
-func (kc KindCluster) RemoveClusterOfType() *airer.Airer {
+func (kc KindCluster) RemoveClusterOfType() error {
 	return localexec.ExecAsShell("kind", "delete", "cluster", "--name", string(kc))
 }

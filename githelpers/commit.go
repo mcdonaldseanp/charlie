@@ -1,11 +1,10 @@
 package githelpers
 
 import (
-	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/localexec"
 )
 
-func NewCommit(maybe_message string) *airer.Airer {
+func NewCommit(maybe_message string) error {
 	arr := addAllCLI()
 	if arr != nil {
 		return arr
@@ -19,20 +18,22 @@ func NewCommit(maybe_message string) *airer.Airer {
 	return arr
 }
 
-func AddCommit(no_edit bool) *airer.Airer {
-	airr := addAllCLI()
-	if airr != nil {
-		return airr
+func AddCommit(no_edit bool) error {
+	arr := addAllCLI()
+	if arr != nil {
+		return arr
 	}
 	// Use the shell 'git commit' so that it will open vi to edit the message
 	if no_edit {
 		// This technically doesn't need to use asShell, but whatever
-		return localexec.ExecAsShell("git", "commit", "--amend", "--no-edit")
+		arr := localexec.ExecAsShell("git", "commit", "--amend", "--no-edit")
+		return arr
 	} else {
-		return localexec.ExecAsShell("git", "commit", "--amend")
+		arr := error(localexec.ExecAsShell("git", "commit", "--amend"))
+		return arr
 	}
 }
 
-func addAllCLI() *airer.Airer {
+func addAllCLI() error {
 	return localexec.ExecAsShell("git", "add", "--all")
 }

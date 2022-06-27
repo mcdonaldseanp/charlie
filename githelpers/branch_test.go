@@ -130,9 +130,9 @@ func TestBranchDifferent(t *testing.T) {
 	// Create a fake commit so the new branch is ahead of main
 	fakeCommit(testdir, t)
 	// Actually run the thing
-	airr = SetBranch("main", false, false)
-	if airr != nil {
-		t.Fatalf("Setting the git branch failed: %s\n", airr)
+	err := SetBranch("main", false, false)
+	if err != nil {
+		t.Fatalf("Setting the git branch failed: %s\n", err)
 	}
 	branch_now = getBranch(t)
 	if branch_now != "main" {
@@ -162,8 +162,8 @@ func TestBranchDirty(t *testing.T) {
 	// Create an uncommitted file
 	fakeFile(testdir, t)
 	// Actually run the thing
-	airr = SetBranch("main", false, false)
-	if airr == nil {
+	err := SetBranch("main", false, false)
+	if err == nil {
 		t.Fatalf("Setting the git branch was supposed to fail!")
 	}
 	branch_now = getBranch(t)
@@ -194,9 +194,9 @@ func TestBranchClear(t *testing.T) {
 	// Create an uncommitted file
 	fakeFile(testdir, t)
 	// Actually run the thing
-	airr = SetBranch("main", true, false)
-	if airr != nil {
-		t.Fatalf("Setting the git branch failed: %s\n", airr)
+	err := SetBranch("main", true, false)
+	if err != nil {
+		t.Fatalf("Setting the git branch failed: %s\n", err)
 	}
 	branch_now = getBranch(t)
 	if branch_now != "main" {

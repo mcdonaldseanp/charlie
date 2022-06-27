@@ -10,15 +10,15 @@ import (
 	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
-func SetBranch(branch_name string, clear bool, pull bool) *airer.Airer {
+func SetBranch(branch_name string, clear bool, pull bool) error {
 	// Don't need to validate bool params, there will be a type error
 	// if anything other than bools are passed
-	arr := validator.ValidateParams(fmt.Sprintf(
+	err := validator.ValidateParams(fmt.Sprintf(
 		`[{"name":"branch_name","value":"%s","validate":["NotEmpty"]}]`,
 		branch_name,
 	))
-	if arr != nil {
-		return arr
+	if err != nil {
+		return err
 	}
 	wt, airr := OpenWorktree()
 	if airr != nil {
@@ -36,7 +36,7 @@ func SetBranch(branch_name string, clear bool, pull bool) *airer.Airer {
 			Origin:  nil,
 		}
 	}
-	err := wt.Checkout(&git.CheckoutOptions{
+	err = wt.Checkout(&git.CheckoutOptions{
 		Branch: plumbing.NewBranchReferenceName(branch_name),
 		Force:  clear,
 		Keep:   false,
@@ -57,19 +57,19 @@ func SetBranch(branch_name string, clear bool, pull bool) *airer.Airer {
 	return nil
 }
 
-func GetPR(pr_name string, clear bool, git_remote string) *airer.Airer {
+func GetPR(pr_name string, clear bool, git_remote string) error {
 	// Don't need to validate bool params, there will be a type error
 	// if anything other than bools are passed
-	arr := validator.ValidateParams(fmt.Sprintf(
+	err := validator.ValidateParams(fmt.Sprintf(
 		`[{"name":"pr_name","value":"%s","validate":["NotEmpty", "IsNumber"]}]`,
 		pr_name,
 	))
-	if arr != nil {
-		return arr
+	if err != nil {
+		return err
 	}
 
 	new_branch_name := "PR" + pr_name
-	arr = localexec.ExecAsShell("git", "fetch", git_remote, "pull/"+pr_name+"/head:"+new_branch_name)
+	arr := localexec.ExecAsShell("git", "fetch", git_remote, "pull/"+pr_name+"/head:"+new_branch_name)
 	if arr != nil {
 		return arr
 	}

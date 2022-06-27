@@ -5,6 +5,7 @@ go 1.18
 require (
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
+	github.com/mcdonaldseanp/clibuild v0.0.2
 )
 
 require (
@@ -25,3 +26,5 @@ require (
 	gopkg.in/warnings.v0 v0.1.2 // indirect
 	gopkg.in/yaml.v2 v2.4.0 // indirect
 )
+
+replace github.com/mcdonaldseanp/clibuild => C:\Users\mcdse\Workspace\dev-tools\clibuild

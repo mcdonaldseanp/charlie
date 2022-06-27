@@ -7,10 +7,10 @@ import (
 	"github.com/mcdonaldseanp/charlie/localexec"
 )
 
-func StartService(service_name string) *airer.Airer {
+func StartService(service_name string) error {
 	airr := localexec.ExecAsShell("net.exe", "start", service_name)
 	if airr != nil {
-		if exitError, ok := airr.Origin.(*exec.ExitError); ok {
+		if exitError, ok := airr.(*airer.Airer).Origin.(*exec.ExitError); ok {
 			// If the exit code was '2' then the service was already running
 			if exitError.ExitCode() != 2 {
 				return airr

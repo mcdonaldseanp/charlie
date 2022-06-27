@@ -3,14 +3,13 @@ package container
 import (
 	"fmt"
 
-	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/find"
 	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/winservice"
 	"github.com/mcdonaldseanp/clibuild/validator"
 )
 
-func StartDocker() *airer.Airer {
+func StartDocker() error {
 	arr := winservice.StartService("com.docker.service")
 	if arr != nil {
 		return arr
@@ -19,7 +18,7 @@ func StartDocker() *airer.Airer {
 	return arr
 }
 
-func PublishContainer(name string, tag string, registry_url string) *airer.Airer {
+func PublishContainer(name string, tag string, registry_url string) error {
 	arr := validator.ValidateParams(fmt.Sprintf(
 		`[
 			{"name":"name","value":"%s","validate":["NotEmpty"]},
