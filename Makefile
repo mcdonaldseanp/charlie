@@ -1,4 +1,4 @@
-GO_PACKAGES=. ./airer ./auth ./container ./find ./githelpers ./kubernetes ./localexec ./localfile ./remotedata ./replacers ./sanitize ./version ./winservice
+GO_PACKAGES=. ./airer ./auth ./container ./find ./githelpers ./kubernetes ./localfile ./replacers ./sanitize ./version ./winservice
 GO_MODULE_NAME=github.com/mcdonaldseanp/charlie
 GO_BIN_NAME=charlie
 RELEASE_ARTIFACTS=./kubernetes/kind_config.yaml
