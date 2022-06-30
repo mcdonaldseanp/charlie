@@ -5,7 +5,7 @@ import (
 	"strings"
 	"testing"
 
-	"github.com/mcdonaldseanp/charlie/localexec"
+	"github.com/mcdonaldseanp/lookout/localexec"
 )
 
 func initRepo(t *testing.T) {

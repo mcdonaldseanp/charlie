@@ -3,8 +3,8 @@ package kubernetes
 import (
 	"fmt"
 
-	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/clibuild/validator"
+	"github.com/mcdonaldseanp/lookout/localexec"
 )
 
 type GKECluster string

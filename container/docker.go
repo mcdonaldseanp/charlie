@@ -4,9 +4,9 @@ import (
 	"fmt"
 
 	"github.com/mcdonaldseanp/charlie/find"
-	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/winservice"
 	"github.com/mcdonaldseanp/clibuild/validator"
+	"github.com/mcdonaldseanp/lookout/localexec"
 )
 
 func StartDocker() error {

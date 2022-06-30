@@ -4,11 +4,12 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/localfile"
-	"github.com/mcdonaldseanp/charlie/remotedata"
+	"github.com/mcdonaldseanp/charlie/replacers"
 	"github.com/mcdonaldseanp/charlie/version"
 	"github.com/mcdonaldseanp/clibuild/validator"
+	"github.com/mcdonaldseanp/lookout/localexec"
+	"github.com/mcdonaldseanp/lookout/remotedata"
 )
 
 type KindCluster string
@@ -25,10 +26,11 @@ func (kc KindCluster) NewClusterOfType(conf_loc string, extra_flags []string) er
 	}
 
 	if len(conf_loc) < 1 {
-		data, arr := remotedata.ParsedDownload(version.ReleaseArtifact("kind_config.yaml"))
-		if arr != nil {
-			return arr
+		data, err := remotedata.Download(version.ReleaseArtifact("kind_config.yaml"))
+		if err != nil {
+			return err
 		}
+		replacers.ReplaceVarsWithEnv(data)
 		tmpfile, arr := localfile.TempFile("kind_config.yaml", []byte(data))
 		if arr != nil {
 			return arr

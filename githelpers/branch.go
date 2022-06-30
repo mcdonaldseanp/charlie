@@ -6,8 +6,8 @@ import (
 	"github.com/go-git/go-git/v5"
 	"github.com/go-git/go-git/v5/plumbing"
 	"github.com/mcdonaldseanp/charlie/airer"
-	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/clibuild/validator"
+	"github.com/mcdonaldseanp/lookout/localexec"
 )
 
 func SetBranch(branch_name string, clear bool, pull bool) error {

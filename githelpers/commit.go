@@ -1,7 +1,7 @@
 package githelpers
 
 import (
-	"github.com/mcdonaldseanp/charlie/localexec"
+	"github.com/mcdonaldseanp/lookout/localexec"
 )
 
 func NewCommit(maybe_message string) error {

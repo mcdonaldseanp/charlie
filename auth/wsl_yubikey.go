@@ -6,8 +6,8 @@ import (
 
 	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/find"
-	"github.com/mcdonaldseanp/charlie/localexec"
 	"github.com/mcdonaldseanp/charlie/winservice"
+	"github.com/mcdonaldseanp/lookout/localexec"
 )
 
 func yubikeyAttached(hw_id string) bool {
