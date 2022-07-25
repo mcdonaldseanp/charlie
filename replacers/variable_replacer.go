@@ -24,7 +24,6 @@ func ReplaceVarsWithEnv(input []byte) (string, error) {
 	var result string = string(input)
 	var vars_seen []string = make([]string, 0)
 	var missing_os_vars []string = make([]string, 0)
-	var arr *airer.Airer = nil
 
 	// See if there are any vars to replace
 	matcher, _ := regexp.Compile(`\$__[A-Za-z_\d]+__\$`)
@@ -45,11 +44,11 @@ func ReplaceVarsWithEnv(input []byte) (string, error) {
 		vars_seen = append(vars_seen, env_var_name)
 	}
 	if len(missing_os_vars) != 0 {
-		arr = &airer.Airer{
+		return result, &airer.Airer{
 			Kind:    airer.InvalidInput,
 			Message: fmt.Sprintf("The following env vars were empty: %s", strings.Join(missing_os_vars, ", ")),
 			Origin:  nil,
 		}
 	}
-	return result, arr
+	return result, nil
 }

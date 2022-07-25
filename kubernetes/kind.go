@@ -26,11 +26,14 @@ func (kc KindCluster) NewClusterOfType(conf_loc string, extra_flags []string) er
 	}
 
 	if len(conf_loc) < 1 {
-		data, err := remotedata.Download(version.ReleaseArtifact("kind_config.yaml"))
+		raw_data, err := remotedata.Download(version.ReleaseArtifact("kind_config.yaml"))
 		if err != nil {
 			return err
 		}
-		replacers.ReplaceVarsWithEnv(data)
+		data, err := replacers.ReplaceVarsWithEnv(raw_data)
+		if err != nil {
+			return err
+		}
 		tmpfile, arr := localfile.TempFile("kind_config.yaml", []byte(data))
 		if arr != nil {
 			return arr
