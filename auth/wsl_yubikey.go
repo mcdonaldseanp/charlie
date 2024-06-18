@@ -11,7 +11,7 @@ import (
 )
 
 func yubikeyAttached(hw_id string) bool {
-	output, _, airr := localexec.ExecReadOutput("usbipd.exe", "wsl", "list")
+	output, _, airr := localexec.ExecReadOutput("usbipd.exe", "list")
 	if airr != nil {
 		return false
 	}
@@ -19,9 +19,7 @@ func yubikeyAttached(hw_id string) bool {
 	if substr == "" {
 		return false
 	}
-	// Double negative here: returns true if the line does not
-	// contain "Not attached"
-	if !strings.Contains(substr, "Not attached") {
+	if strings.Contains(substr, "Attached") {
 		return true
 	}
 	return false
@@ -39,7 +37,11 @@ func MountYubikey(hw_id string) error {
 			Origin:  nil,
 		}
 	}
-	airr = localexec.ExecAsShell("usbipd.exe", "wsl", "attach", "--hardware-id", hw_id)
+	airr = localexec.ExecAsShell("usbipd.exe", "bind", "--hardware-id", hw_id)
+	if airr != nil {
+		return airr
+	}
+	airr = localexec.ExecAsShell("usbipd.exe", "attach", "--wsl", "--hardware-id", hw_id)
 	if airr != nil {
 		return airr
 	}
@@ -57,5 +59,5 @@ func DismountYubikey(hw_id string) error {
 			Origin:  nil,
 		}
 	}
-	return localexec.ExecAsShell("usbipd.exe", "wsl", "detach", "--hardware-id", hw_id)
+	return localexec.ExecAsShell("usbipd.exe", "detach", "--hardware-id", hw_id)
 }
