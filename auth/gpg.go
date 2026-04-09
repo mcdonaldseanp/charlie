@@ -22,13 +22,6 @@ func CheckGPGKeyLocked() error {
 	return nil
 }
 
-func UnlockGPGKey(hw_id string) error {
-	err := MountYubikey(hw_id)
-	if err != nil {
-		airr, ok := err.(*airer.Airer)
-		if !ok || airr.Kind != airer.CompletedError {
-			return err
-		}
-	}
+func UnlockGPGKey() error {
 	return localexec.ExecAsShell(strings.NewReader("test\n"), "gpg", "--clearsign")
 }

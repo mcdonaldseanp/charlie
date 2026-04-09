@@ -297,15 +297,37 @@ func main() {
 			Noun:     "keys",
 			Supports: []string{"linux"},
 			ExecutionFn: func() {
-				usage := "charlie unlock keys"
-				description := "Mount YubiKey if needed and unlock the signing key interactively"
-				cli.ShouldHaveArgs(0, usage, description, yubikey_fs)
-				cli.HandleCommandError(
-					auth.UnlockGPGKey(*yubikey_hw_id),
-					usage,
-					description,
-					yubikey_fs,
-				)
+				usage := "charlie unlock keys [KEY TYPES] [FLAGS]"
+				description := "Unlock the specified key types interactively. KEY TYPES is a comma-separated list of one or more of 'gpg', 'ssh'"
+				use_yubikey := yubikey_fs.Bool("yubikey", false, "mount YubiKey before unlocking")
+				locked_ssh_key := yubikey_fs.String("locked-ssh-key", os.Getenv("LOCKED_SSH_KEY"), "public SSH key to unlock")
+				cli.ShouldHaveArgs(1, usage, description, yubikey_fs)
+				if *use_yubikey {
+					err := auth.MountYubikey(*yubikey_hw_id)
+					if err != nil {
+						airr, ok := err.(*airer.Airer)
+						if !ok || airr.Kind != airer.CompletedError {
+							cli.HandleCommandError(err, usage, description, yubikey_fs)
+						}
+					}
+				}
+				key_types := strings.Split(os.Args[3], ",")
+				for _, key_type := range key_types {
+					var err error
+					switch key_type {
+					case "gpg":
+						err = auth.UnlockGPGKey()
+					case "ssh":
+						err = auth.UnlockSSHKey(*locked_ssh_key)
+					default:
+						err = &airer.Airer{
+							Kind:    airer.InvalidInput,
+							Message: "Unknown key type '" + key_type + "'. KEY TYPES should be one or more of 'gpg', 'ssh'",
+							Origin:  nil,
+						}
+					}
+					cli.HandleCommandError(err, usage, description, yubikey_fs)
+				}
 			},
 		},
 		{
