@@ -312,8 +312,8 @@ func main() {
 					}
 				}
 				key_types := strings.Split(os.Args[3], ",")
+				var err error
 				for _, key_type := range key_types {
-					var err error
 					switch key_type {
 					case "gpg":
 						err = auth.UnlockGPGKey()
@@ -326,8 +326,11 @@ func main() {
 							Origin:  nil,
 						}
 					}
-					cli.HandleCommandError(err, usage, description, yubikey_fs)
+					if err != nil {
+						break
+					}
 				}
+				cli.HandleCommandError(err, usage, description, yubikey_fs)
 			},
 		},
 		{
