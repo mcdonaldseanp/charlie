@@ -12,10 +12,11 @@ const (
 	CompletedError
 	InvalidInput
 	RemoteExecError
+	AuthError
 )
 
 func (ar AirerType) String() string {
-	return []string{"Shell command failed:", "Execution failed:", "Already done:", "Invalid input:", "Remote execution failed:"}[ar]
+	return []string{"Shell command failed:", "Execution failed:", "Already done:", "Invalid input:", "Remote execution failed:", "Authentication failed:"}[ar]
 }
 
 // Your illiteracy has screwed us again, charlie!

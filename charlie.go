@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"github.com/mcdonaldseanp/charlie/airer"
 	"github.com/mcdonaldseanp/charlie/auth"
 	"github.com/mcdonaldseanp/charlie/container"
 	"github.com/mcdonaldseanp/charlie/githelpers"
@@ -102,6 +103,29 @@ func main() {
 					description,
 					nil,
 				)
+			},
+		},
+		{
+			Verb:     "check",
+			Noun:     "locked",
+			Supports: []string{"linux"},
+			ExecutionFn: func() {
+				usage := "charlie check locked [TARGET]"
+				description := "Check if TARGET is locked. TARGET should be one of 'yubikey'"
+				cli.ShouldHaveArgs(1, usage, description, nil)
+				target := os.Args[3]
+				var err error
+				switch target {
+				case "yubikey":
+					err = auth.CheckYubikeyLocked()
+				default:
+					err = &airer.Airer{
+						Kind:    airer.InvalidInput,
+						Message: "Unknown target '" + target + "'. TARGET should be one of 'yubikey'",
+						Origin:  nil,
+					}
+				}
+				cli.HandleCommandError(err, usage, description, nil)
 			},
 		},
 		{
