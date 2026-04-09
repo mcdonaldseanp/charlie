@@ -293,6 +293,22 @@ func main() {
 			},
 		},
 		{
+			Verb:     "unlock",
+			Noun:     "yubikey",
+			Supports: []string{"linux"},
+			ExecutionFn: func() {
+				usage := "charlie unlock yubikey"
+				description := "Mount YubiKey if needed and unlock the signing key interactively"
+				cli.ShouldHaveArgs(0, usage, description, yubikey_fs)
+				cli.HandleCommandError(
+					auth.UnlockYubikey(*yubikey_hw_id),
+					usage,
+					description,
+					yubikey_fs,
+				)
+			},
+		},
+		{
 			Verb:     "start",
 			Noun:     "docker",
 			Supports: []string{"linux", "windows"},

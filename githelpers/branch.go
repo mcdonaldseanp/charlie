@@ -49,7 +49,7 @@ func SetBranch(branch_name string, clear bool, pull bool) error {
 		}
 	}
 	if pull {
-		arr := localexec.ExecAsShell("git", "pull")
+		arr := localexec.ExecAsShell(nil, "git", "pull")
 		if arr != nil {
 			return arr
 		}
@@ -69,7 +69,7 @@ func GetPR(pr_name string, clear bool, git_remote string) error {
 	}
 
 	new_branch_name := "PR" + pr_name
-	arr := localexec.ExecAsShell("git", "fetch", git_remote, "pull/"+pr_name+"/head:"+new_branch_name)
+	arr := localexec.ExecAsShell(nil, "git", "fetch", git_remote, "pull/"+pr_name+"/head:"+new_branch_name)
 	if arr != nil {
 		return arr
 	}

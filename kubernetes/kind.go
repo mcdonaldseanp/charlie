@@ -41,9 +41,9 @@ func (kc KindCluster) NewClusterOfType(conf_loc string, extra_flags []string) er
 		defer os.Remove(tmpfile)
 		conf_loc = tmpfile
 	}
-	return localexec.ExecAsShell("kind", "create", "cluster", "--config", conf_loc, "--name", string(kc))
+	return localexec.ExecAsShell(nil, "kind", "create", "cluster", "--config", conf_loc, "--name", string(kc))
 }
 
 func (kc KindCluster) RemoveClusterOfType() error {
-	return localexec.ExecAsShell("kind", "delete", "cluster", "--name", string(kc))
+	return localexec.ExecAsShell(nil, "kind", "delete", "cluster", "--name", string(kc))
 }

@@ -11,7 +11,7 @@ import (
 )
 
 func yubikeyAttached(hw_id string) bool {
-	output, _, airr := localexec.ExecReadOutput("usbipd.exe", "list")
+	output, _, airr := localexec.ExecReadOutput(nil, "usbipd.exe", "list")
 	if airr != nil {
 		return false
 	}
@@ -37,18 +37,18 @@ func MountYubikey(hw_id string) error {
 			Origin:  nil,
 		}
 	}
-	airr = localexec.ExecAsShell("usbipd.exe", "bind", "--hardware-id", hw_id)
+	airr = localexec.ExecAsShell(nil, "usbipd.exe", "bind", "--hardware-id", hw_id)
 	if airr != nil {
 		return airr
 	}
-	airr = localexec.ExecAsShell("usbipd.exe", "attach", "--wsl", "--hardware-id", hw_id)
+	airr = localexec.ExecAsShell(nil, "usbipd.exe", "attach", "--wsl", "--hardware-id", hw_id)
 	if airr != nil {
 		return airr
 	}
 	// Sleep for a couple seconds before restarting pcscd so that usbipd has
 	// a chance to load the key
 	time.Sleep(2 * time.Second)
-	return localexec.ExecAsShell("sudo", "service", "pcscd", "restart")
+	return localexec.ExecAsShell(nil, "sudo", "service", "pcscd", "restart")
 }
 
 func DismountYubikey(hw_id string) error {
@@ -59,5 +59,5 @@ func DismountYubikey(hw_id string) error {
 			Origin:  nil,
 		}
 	}
-	return localexec.ExecAsShell("usbipd.exe", "detach", "--hardware-id", hw_id)
+	return localexec.ExecAsShell(nil, "usbipd.exe", "detach", "--hardware-id", hw_id)
 }

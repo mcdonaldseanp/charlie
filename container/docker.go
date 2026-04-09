@@ -33,16 +33,16 @@ func PublishContainer(name string, tag string, registry_url string) error {
 		return arr
 	}
 
-	output, _, airr := localexec.ExecReadOutput("docker", "images", "-q")
+	output, _, airr := localexec.ExecReadOutput(nil, "docker", "images", "-q")
 	if airr != nil {
 		return airr
 	}
 	last_image := find.FirstLine(output)
 	full_tag := registry_url + "/" + name + ":" + tag
-	airr = localexec.ExecAsShell("docker", "tag", last_image, full_tag)
+	airr = localexec.ExecAsShell(nil, "docker", "tag", last_image, full_tag)
 	if airr != nil {
 		return airr
 	}
-	airr = localexec.ExecAsShell("docker", "push", full_tag)
+	airr = localexec.ExecAsShell(nil, "docker", "push", full_tag)
 	return airr
 }

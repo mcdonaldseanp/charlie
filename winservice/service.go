@@ -8,7 +8,7 @@ import (
 )
 
 func StartService(service_name string) error {
-	airr := localexec.ExecAsShell("net.exe", "start", service_name)
+	airr := localexec.ExecAsShell(nil, "net.exe", "start", service_name)
 	if airr != nil {
 		if exitError, ok := airr.(*errtype.ShellError).Origin.(*exec.ExitError); ok {
 			// If the exit code was '2' then the service was already running

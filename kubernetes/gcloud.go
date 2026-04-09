@@ -10,11 +10,11 @@ import (
 type GKECluster string
 
 func InitializeGcloud() error {
-	airr := localexec.ExecAsShell("gcloud", "auth", "login", "--no-launch-browser")
+	airr := localexec.ExecAsShell(nil, "gcloud", "auth", "login", "--no-launch-browser")
 	if airr != nil {
 		return airr
 	}
-	airr = localexec.ExecAsShell("gcloud", "config", "set", "project", "engineering-scratchpad")
+	airr = localexec.ExecAsShell(nil, "gcloud", "config", "set", "project", "engineering-scratchpad")
 	return airr
 }
 
@@ -30,7 +30,7 @@ func ResizeCluster(cluster_name string, num_nodes string) error {
 	if err != nil {
 		return err
 	}
-	return localexec.ExecAsShell("gcloud", "container", "clusters", "resize", cluster_name, "--num-nodes", num_nodes)
+	return localexec.ExecAsShell(nil, "gcloud", "container", "clusters", "resize", cluster_name, "--num-nodes", num_nodes)
 }
 
 func (gkec GKECluster) NewClusterOfType(conf_loc string, extra_flags []string) error {
@@ -45,6 +45,7 @@ func (gkec GKECluster) NewClusterOfType(conf_loc string, extra_flags []string) e
 		return err
 	}
 	return localexec.ExecAsShell(
+		nil,
 		"gcloud",
 		"container",
 		"clusters",
@@ -72,5 +73,5 @@ func (gkec GKECluster) RemoveClusterOfType() error {
 	if err != nil {
 		return err
 	}
-	return localexec.ExecAsShell("gcloud", "container", "clusters", "delete", string(gkec))
+	return localexec.ExecAsShell(nil, "gcloud", "container", "clusters", "delete", string(gkec))
 }

@@ -6,7 +6,7 @@ require (
 	github.com/go-git/go-billy/v5 v5.3.1
 	github.com/go-git/go-git/v5 v5.4.2
 	github.com/mcdonaldseanp/clibuild v0.0.4
-	github.com/mcdonaldseanp/lookout v0.0.6
+	github.com/mcdonaldseanp/lookout v0.0.7
 )
 
 require (
