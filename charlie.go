@@ -111,17 +111,17 @@ func main() {
 			Supports: []string{"linux"},
 			ExecutionFn: func() {
 				usage := "charlie check locked [TARGET]"
-				description := "Check if TARGET is locked. TARGET should be one of 'yubikey'"
+				description := "Check if TARGET is locked. TARGET should be one of 'gpgkey'"
 				cli.ShouldHaveArgs(1, usage, description, nil)
 				target := os.Args[3]
 				var err error
 				switch target {
-				case "yubikey":
-					err = auth.CheckYubikeyLocked()
+				case "gpgkey":
+					err = auth.CheckGPGKeyLocked()
 				default:
 					err = &airer.Airer{
 						Kind:    airer.InvalidInput,
-						Message: "Unknown target '" + target + "'. TARGET should be one of 'yubikey'",
+						Message: "Unknown target '" + target + "'. TARGET should be one of 'gpgkey'",
 						Origin:  nil,
 					}
 				}
@@ -294,14 +294,14 @@ func main() {
 		},
 		{
 			Verb:     "unlock",
-			Noun:     "yubikey",
+			Noun:     "keys",
 			Supports: []string{"linux"},
 			ExecutionFn: func() {
-				usage := "charlie unlock yubikey"
+				usage := "charlie unlock keys"
 				description := "Mount YubiKey if needed and unlock the signing key interactively"
 				cli.ShouldHaveArgs(0, usage, description, yubikey_fs)
 				cli.HandleCommandError(
-					auth.UnlockYubikey(*yubikey_hw_id),
+					auth.UnlockGPGKey(*yubikey_hw_id),
 					usage,
 					description,
 					yubikey_fs,
