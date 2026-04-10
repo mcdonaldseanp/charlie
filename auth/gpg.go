@@ -25,3 +25,8 @@ func CheckGPGKeyLocked() error {
 func UnlockGPGKey() error {
 	return localexec.ExecAsShell(strings.NewReader("test\n"), "gpg", "--clearsign")
 }
+
+func UpdateGPGTTY() error {
+	_, _, err := localexec.ExecReadOutput(nil, "gpg-connect-agent", "UPDATESTARTUPTTY", "/bye")
+	return err
+}

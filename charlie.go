@@ -301,36 +301,14 @@ func main() {
 				description := "Unlock the specified key types interactively. KEY TYPES is a comma-separated list of one or more of 'gpg', 'ssh'"
 				use_yubikey := yubikey_fs.Bool("yubikey", false, "mount YubiKey before unlocking")
 				locked_ssh_key := yubikey_fs.String("locked-ssh-key", os.Getenv("LOCKED_SSH_KEY"), "public SSH key to unlock")
+				update_gpg_tty := yubikey_fs.Bool("update-gpg-tty", false, "run UPDATESTARTUPTTY to point gpg-agent at the current terminal before unlocking")
 				cli.ShouldHaveArgs(1, usage, description, yubikey_fs)
-				if *use_yubikey {
-					err := auth.MountYubikey(*yubikey_hw_id)
-					if err != nil {
-						airr, ok := err.(*airer.Airer)
-						if !ok || airr.Kind != airer.CompletedError {
-							cli.HandleCommandError(err, usage, description, yubikey_fs)
-						}
-					}
-				}
-				key_types := strings.Split(os.Args[3], ",")
-				var err error
-				for _, key_type := range key_types {
-					switch key_type {
-					case "gpg":
-						err = auth.UnlockGPGKey()
-					case "ssh":
-						err = auth.UnlockSSHKey(*locked_ssh_key)
-					default:
-						err = &airer.Airer{
-							Kind:    airer.InvalidInput,
-							Message: "Unknown key type '" + key_type + "'. KEY TYPES should be one or more of 'gpg', 'ssh'",
-							Origin:  nil,
-						}
-					}
-					if err != nil {
-						break
-					}
-				}
-				cli.HandleCommandError(err, usage, description, yubikey_fs)
+				cli.HandleCommandError(
+					auth.UnlockKeys(strings.Split(os.Args[3], ","), *update_gpg_tty, *use_yubikey, *yubikey_hw_id, *locked_ssh_key),
+					usage,
+					description,
+					yubikey_fs,
+				)
 			},
 		},
 		{
